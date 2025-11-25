@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, AlertCircle, Phone, Mail } from "lucide-react";
+import { Loader2, User, Mail, Lock, Phone, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OTPInput } from "@/components/ui/otp-input";
 
@@ -86,10 +86,12 @@ export default function RegisterPage() {
 
     try {
       if (!window.recaptchaVerifier) {
+        // @ts-ignore
         window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container-register", {
           size: "invisible",
         });
       }
+      // @ts-ignore
       const appVerifier = window.recaptchaVerifier;
       const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
       setConfirmationResult(result);
@@ -98,7 +100,9 @@ export default function RegisterPage() {
       console.error("Error sending OTP:", err);
       setError(err.message || "Failed to send OTP. Please try again.");
       if (window.recaptchaVerifier) {
+        // @ts-ignore
         window.recaptchaVerifier.clear();
+        // @ts-ignore
         window.recaptchaVerifier = null;
       }
     } finally {
@@ -159,12 +163,12 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md border-none shadow-xl">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
-          <CardDescription className="text-center">
-            Enter your details to get started
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 p-4">
+      <Card className="w-full max-w-md border-none shadow-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Create Account</CardTitle>
+          <CardDescription className="text-gray-500 dark:text-gray-400">
+            Join Service Buddy today
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -176,7 +180,7 @@ export default function RegisterPage() {
           )}
 
           <Tabs defaultValue="email" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="email" disabled={step !== "method"}>Email</TabsTrigger>
               <TabsTrigger value="phone" disabled={step !== "method"}>Phone</TabsTrigger>
             </TabsList>
@@ -205,7 +209,7 @@ export default function RegisterPage() {
                   <Label htmlFor="password">Password</Label>
                   <Input id="password" name="password" type="password" required />
                 </div>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+                <Button className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25" disabled={isLoading}>
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Create Account"}
                 </Button>
               </form>
@@ -223,7 +227,7 @@ export default function RegisterPage() {
                         name="phone"
                         type="tel"
                         placeholder="98765 43210"
-                        className="pl-10"
+                        className="pl-10 h-11"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         required
@@ -231,7 +235,7 @@ export default function RegisterPage() {
                     </div>
                   </div>
                   <div id="recaptcha-container-register"></div>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+                  <Button className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25" disabled={isLoading}>
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Send OTP"}
                   </Button>
                 </form>
@@ -247,7 +251,7 @@ export default function RegisterPage() {
                   <OTPInput length={6} onComplete={setOtp} />
 
                   <Button
-                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
                     onClick={handleVerifyOtp}
                     disabled={isLoading || otp.length !== 6}
                   >
@@ -272,7 +276,7 @@ export default function RegisterPage() {
                     <Label htmlFor="email">Email (Optional)</Label>
                     <Input id="email" name="email" type="email" placeholder="name@example.com" />
                   </div>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+                  <Button className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25" disabled={isLoading}>
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Complete Registration"}
                   </Button>
                 </form>

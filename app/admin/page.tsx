@@ -2,27 +2,30 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   LayoutDashboard,
   Users,
   Calendar,
   Settings,
   Briefcase,
-  TrendingUp,
   DollarSign,
   CheckCircle2,
   XCircle,
-  Clock,
-  Loader2
+  Loader2,
+  MapPin,
+  Phone,
+  Mail,
+  FileText,
+  User
 } from "lucide-react";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, limit, doc, updateDoc } from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
 
 export default function AdminDashboard() {
@@ -36,45 +39,76 @@ export default function AdminDashboard() {
   });
   const [bookings, setBookings] = useState<any[]>([]);
   const [technicians, setTechnicians] = useState<any[]>([]);
+  const [usersList, setUsersList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTech, setSelectedTech] = useState<any>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const fetchData = async () => {
+    if (!user || role !== "admin") return;
+
+    try {
+      setLoading(true);
+      // Fetch Bookings
+      const bookingsSnap = await getDocs(query(collection(db, "bookings"), orderBy("createdAt", "desc"), limit(10)));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const bookingsData = bookingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
+      setBookings(bookingsData);
+
+      // Fetch Technicians
+      const techniciansSnap = await getDocs(collection(db, "technicians"));
+      const techniciansData = techniciansSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setTechnicians(techniciansData);
+
+      // Fetch Users
+      const usersSnap = await getDocs(collection(db, "users"));
+      const usersData = usersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setUsersList(usersData);
+
+      // Calculate Stats
+      const totalRevenue = bookingsData.reduce((acc: number, curr: { amount?: number }) => acc + (curr.amount || 0), 0);
+      const activeTechs = techniciansData.filter((t: any) => t.status === "approved").length;
+
+      setStats({
+        totalBookings: bookingsSnap.size, // In real app, use count() query
+        totalRevenue,
+        activeTechnicians: activeTechs,
+        totalUsers: usersSnap.size
+      });
+
+    } catch (error) {
+      console.error("Error fetching admin data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user || role !== "admin") return;
-
-      try {
-        // Fetch Bookings
-        const bookingsSnap = await getDocs(query(collection(db, "bookings"), orderBy("createdAt", "desc"), limit(10)));
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const bookingsData = bookingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
-        setBookings(bookingsData);
-
-        // Fetch Technicians
-        const techniciansSnap = await getDocs(collection(db, "technicians"));
-        const techniciansData = techniciansSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setTechnicians(techniciansData);
-
-        // Calculate Stats
-        const totalRevenue = bookingsData.reduce((acc: number, curr: { amount?: number }) => acc + (curr.amount || 0), 0);
-
-        setStats({
-          totalBookings: bookingsSnap.size, // In real app, use count() query
-          totalRevenue,
-          activeTechnicians: techniciansSnap.size,
-          totalUsers: 150 // Mock for now
-        });
-
-      } catch (error) {
-        console.error("Error fetching admin data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (!authLoading) {
       fetchData();
     }
   }, [user, role, authLoading]);
+
+  const handleUpdateStatus = async (techId: string, status: "approved" | "rejected") => {
+    setActionLoading(true);
+    try {
+      await updateDoc(doc(db, "technicians", techId), { status });
+
+      // Update local state
+      setTechnicians(prev => prev.map(t => t.id === techId ? { ...t, status } : t));
+      setSelectedTech(null);
+
+      // Refresh stats if needed
+      const activeTechs = technicians.map(t => t.id === techId ? { ...t, status } : t).filter((t: any) => t.status === "approved").length;
+      setStats(prev => ({ ...prev, activeTechnicians: activeTechs }));
+
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("Failed to update status");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   if (authLoading || loading) {
     return (
@@ -98,9 +132,9 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex font-sans">
       {/* Sidebar */}
-      <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 hidden lg:block">
+      <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 hidden lg:block fixed h-full">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-blue-600">ServiceBuddy</h1>
           <p className="text-xs text-gray-500 mt-1">Admin Panel</p>
@@ -125,12 +159,12 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8 overflow-y-auto">
+      <div className="flex-1 p-8 lg:ml-64">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold">Dashboard</h2>
           <div className="flex items-center space-x-4">
             <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" />
+              <AvatarImage src={user.photoURL || ""} />
               <AvatarFallback>AD</AvatarFallback>
             </Avatar>
           </div>
@@ -193,25 +227,29 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {bookings.map((booking) => (
-                    <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <div className="p-2 bg-gray-100 rounded-lg">
-                          <Calendar className="h-5 w-5 text-gray-600" />
+                  {bookings.length === 0 ? (
+                    <p className="text-gray-500 text-center py-4">No bookings yet.</p>
+                  ) : (
+                    bookings.map((booking) => (
+                      <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          <div className="p-2 bg-gray-100 rounded-lg">
+                            <Calendar className="h-5 w-5 text-gray-600" />
+                          </div>
+                          <div>
+                            <p className="font-semibold">{booking.serviceName}</p>
+                            <p className="text-sm text-gray-500">{booking.address}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold">{booking.serviceName}</p>
-                          <p className="text-sm text-gray-500">{booking.address}</p>
+                        <div className="text-right">
+                          <p className="font-bold">₹{booking.amount}</p>
+                          <Badge variant={booking.status === "completed" ? "default" : "secondary"}>
+                            {booking.status}
+                          </Badge>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold">₹{booking.amount}</p>
-                        <Badge variant={booking.status === "completed" ? "default" : "secondary"}>
-                          {booking.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -223,7 +261,7 @@ export default function AdminDashboard() {
                 <CardTitle>All Bookings</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Full bookings table would go here.</p>
+                <p className="text-gray-500">Full bookings table coming soon.</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -232,25 +270,39 @@ export default function AdminDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Technician Applications</CardTitle>
+                <CardDescription>Manage technician onboarding requests</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {technicians.map((tech) => (
-                    <div key={tech.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <Avatar>
-                          <AvatarFallback>{tech.firstName?.[0]}{tech.lastName?.[0]}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-semibold">{tech.firstName} {tech.lastName}</p>
-                          <p className="text-sm text-gray-500">{tech.category} • {tech.experience} years exp</p>
+                  {technicians.length === 0 ? (
+                    <p className="text-gray-500 text-center py-4">No technician applications found.</p>
+                  ) : (
+                    technicians.map((tech) => (
+                      <div key={tech.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                        <div className="flex items-center space-x-4">
+                          <Avatar>
+                            <AvatarFallback>{tech.fullName?.[0] || "T"}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-semibold">{tech.fullName}</p>
+                            <p className="text-sm text-gray-500 capitalize">{tech.category} • {tech.experience} years exp</p>
+                            <p className="text-xs text-gray-400">{tech.city}, {tech.state}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <Badge variant={
+                            tech.status === "approved" ? "default" :
+                              tech.status === "rejected" ? "destructive" : "secondary"
+                          }>
+                            {tech.status}
+                          </Badge>
+                          <Button variant="outline" size="sm" onClick={() => setSelectedTech(tech)}>
+                            View Details
+                          </Button>
                         </div>
                       </div>
-                      <Badge variant={tech.status === "approved" ? "default" : "secondary"}>
-                        {tech.status}
-                      </Badge>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -259,15 +311,168 @@ export default function AdminDashboard() {
           <TabsContent value="users">
             <Card>
               <CardHeader>
-                <CardTitle>Users</CardTitle>
+                <CardTitle>Registered Users</CardTitle>
+                <CardDescription>List of all registered users on the platform</CardDescription>
               </CardHeader>
               <CardContent>
-                <p>User management interface.</p>
+                <div className="space-y-4">
+                  {usersList.length === 0 ? (
+                    <p className="text-gray-500 text-center py-4">No users found.</p>
+                  ) : (
+                    usersList.map((u) => (
+                      <div key={u.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                            <User className="h-5 w-5 text-gray-500" />
+                          </div>
+                          <div>
+                            <p className="font-semibold">{u.displayName || u.firstName + " " + u.lastName || "Unknown User"}</p>
+                            <p className="text-sm text-gray-500">{u.email}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant="outline" className="capitalize">{u.role || "user"}</Badge>
+                          <p className="text-xs text-gray-400 mt-1">
+                            Joined: {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Technician Details Modal */}
+      <Dialog open={!!selectedTech} onOpenChange={(open) => !open && setSelectedTech(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Technician Details</DialogTitle>
+            <DialogDescription>Review application for {selectedTech?.fullName}</DialogDescription>
+          </DialogHeader>
+
+          {selectedTech && (
+            <div className="grid gap-6 py-4">
+              {/* Personal Info */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg flex items-center"><User className="mr-2 h-4 w-4" /> Personal Information</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500 block">Full Name</span>
+                    <span className="font-medium">{selectedTech.fullName}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 block">Email</span>
+                    <span className="font-medium">{selectedTech.email}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 block">Phone</span>
+                    <span className="font-medium">{selectedTech.phone}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-px bg-gray-200 dark:bg-gray-800" />
+
+              {/* Location */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg flex items-center"><MapPin className="mr-2 h-4 w-4" /> Location</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="col-span-2">
+                    <span className="text-gray-500 block">Address</span>
+                    <span className="font-medium">{selectedTech.address}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 block">City</span>
+                    <span className="font-medium">{selectedTech.city}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 block">Area</span>
+                    <span className="font-medium">{selectedTech.area || "N/A"}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 block">State</span>
+                    <span className="font-medium">{selectedTech.state}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 block">Zip Code</span>
+                    <span className="font-medium">{selectedTech.zip}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-px bg-gray-200 dark:bg-gray-800" />
+
+              {/* Professional */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg flex items-center"><Briefcase className="mr-2 h-4 w-4" /> Professional Profile</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500 block">Category</span>
+                    <span className="font-medium capitalize">{selectedTech.category}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 block">Experience</span>
+                    <span className="font-medium">{selectedTech.experience} Years</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-gray-500 block">Bio</span>
+                    <p className="font-medium mt-1">{selectedTech.bio || "No bio provided."}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-px bg-gray-200 dark:bg-gray-800" />
+
+              {/* Documents */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg flex items-center"><FileText className="mr-2 h-4 w-4" /> Documents</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="border rounded-lg p-4 text-center bg-gray-50 dark:bg-gray-900">
+                    <p className="text-sm font-medium mb-2">Aadhaar Front</p>
+                    <div className="h-20 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                      Preview Unavailable
+                    </div>
+                  </div>
+                  <div className="border rounded-lg p-4 text-center bg-gray-50 dark:bg-gray-900">
+                    <p className="text-sm font-medium mb-2">Aadhaar Back</p>
+                    <div className="h-20 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                      Preview Unavailable
+                    </div>
+                  </div>
+                  <div className="border rounded-lg p-4 text-center bg-gray-50 dark:bg-gray-900">
+                    <p className="text-sm font-medium mb-2">Profile Photo</p>
+                    <div className="h-20 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                      Preview Unavailable
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            {selectedTech?.status === "pending" && (
+              <>
+                <Button variant="destructive" onClick={() => handleUpdateStatus(selectedTech.id, "rejected")} disabled={actionLoading}>
+                  {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reject Application"}
+                </Button>
+                <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleUpdateStatus(selectedTech.id, "approved")} disabled={actionLoading}>
+                  {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Approve Application"}
+                </Button>
+              </>
+            )}
+            {selectedTech?.status !== "pending" && (
+              <Button variant="secondary" disabled>
+                Application {selectedTech?.status}
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
