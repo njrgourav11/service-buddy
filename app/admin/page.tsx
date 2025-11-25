@@ -22,11 +22,13 @@ import {
   Phone,
   Mail,
   FileText,
-  User
+  User,
+  Search
 } from "lucide-react";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, query, orderBy, limit, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, limit, doc, updateDoc, where } from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function AdminDashboard() {
   const { user, role, loading: authLoading } = useAuth();
@@ -41,7 +43,11 @@ export default function AdminDashboard() {
   const [technicians, setTechnicians] = useState<any[]>([]);
   const [usersList, setUsersList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Modal States
   const [selectedTech, setSelectedTech] = useState<any>(null);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [assignTechId, setAssignTechId] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
 
   const fetchData = async () => {
@@ -50,7 +56,7 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       // Fetch Bookings
-      const bookingsSnap = await getDocs(query(collection(db, "bookings"), orderBy("createdAt", "desc"), limit(10)));
+      const bookingsSnap = await getDocs(query(collection(db, "bookings"), orderBy("createdAt", "desc")));
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const bookingsData = bookingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
       setBookings(bookingsData);
@@ -70,7 +76,7 @@ export default function AdminDashboard() {
       const activeTechs = techniciansData.filter((t: any) => t.status === "approved").length;
 
       setStats({
-        totalBookings: bookingsSnap.size, // In real app, use count() query
+        totalBookings: bookingsSnap.size,
         totalRevenue,
         activeTechnicians: activeTechs,
         totalUsers: usersSnap.size
@@ -110,6 +116,36 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleAssignTechnician = async () => {
+    if (!selectedBooking || !assignTechId) return;
+    setActionLoading(true);
+
+    try {
+      const tech = technicians.find(t => t.id === assignTechId);
+      await updateDoc(doc(db, "bookings", selectedBooking.id), {
+        technicianId: assignTechId,
+        technicianName: tech?.fullName || "Unknown",
+        status: "assigned"
+      });
+
+      // Update local state
+      setBookings(prev => prev.map(b => b.id === selectedBooking.id ? {
+        ...b,
+        technicianId: assignTechId,
+        technicianName: tech?.fullName,
+        status: "assigned"
+      } : b));
+
+      setSelectedBooking(null);
+      setAssignTechId("");
+    } catch (error) {
+      console.error("Error assigning technician:", error);
+      alert("Failed to assign technician");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -130,6 +166,8 @@ export default function AdminDashboard() {
       </div>
     );
   }
+
+  const approvedTechnicians = technicians.filter(t => t.status === "approved");
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex font-sans">
@@ -227,29 +265,26 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {bookings.length === 0 ? (
-                    <p className="text-gray-500 text-center py-4">No bookings yet.</p>
-                  ) : (
-                    bookings.map((booking) => (
-                      <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center space-x-4">
-                          <div className="p-2 bg-gray-100 rounded-lg">
-                            <Calendar className="h-5 w-5 text-gray-600" />
-                          </div>
-                          <div>
-                            <p className="font-semibold">{booking.serviceName}</p>
-                            <p className="text-sm text-gray-500">{booking.address}</p>
-                          </div>
+                  {bookings.slice(0, 5).map((booking) => (
+                    <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className="p-2 bg-gray-100 rounded-lg">
+                          <Calendar className="h-5 w-5 text-gray-600" />
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold">₹{booking.amount}</p>
-                          <Badge variant={booking.status === "completed" ? "default" : "secondary"}>
-                            {booking.status}
-                          </Badge>
+                        <div>
+                          <p className="font-semibold">{booking.serviceName}</p>
+                          <p className="text-sm text-gray-500">{booking.userName}</p>
                         </div>
                       </div>
-                    ))
-                  )}
+                      <div className="text-right">
+                        <p className="font-bold">₹{booking.amount}</p>
+                        <Badge variant={booking.status === "completed" ? "default" : "secondary"}>
+                          {booking.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                  {bookings.length === 0 && <p className="text-gray-500 text-center">No bookings yet.</p>}
                 </div>
               </CardContent>
             </Card>
@@ -259,9 +294,60 @@ export default function AdminDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>All Bookings</CardTitle>
+                <CardDescription>Manage and assign bookings</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-500">Full bookings table coming soon.</p>
+                <div className="space-y-4">
+                  {bookings.length === 0 ? (
+                    <p className="text-gray-500 text-center py-8">No bookings found.</p>
+                  ) : (
+                    <div className="rounded-md border">
+                      <div className="grid grid-cols-6 gap-4 p-4 bg-gray-50 dark:bg-gray-900 font-medium text-sm">
+                        <div className="col-span-2">Service Details</div>
+                        <div>Customer</div>
+                        <div>Date & Time</div>
+                        <div>Status</div>
+                        <div className="text-right">Action</div>
+                      </div>
+                      {bookings.map((booking) => (
+                        <div key={booking.id} className="grid grid-cols-6 gap-4 p-4 border-t items-center text-sm">
+                          <div className="col-span-2">
+                            <p className="font-semibold">{booking.serviceName}</p>
+                            <p className="text-xs text-gray-500">{booking.address}</p>
+                          </div>
+                          <div>
+                            <p className="font-medium">{booking.userName}</p>
+                          </div>
+                          <div>
+                            <p>{new Date(booking.date).toLocaleDateString()}</p>
+                            <p className="text-xs text-gray-500">{booking.time}</p>
+                          </div>
+                          <div>
+                            <Badge variant={
+                              booking.status === "confirmed" ? "default" :
+                                booking.status === "assigned" ? "secondary" :
+                                  booking.status === "completed" ? "outline" : "destructive"
+                            }>
+                              {booking.status}
+                            </Badge>
+                            {booking.technicianName && (
+                              <p className="text-xs text-gray-500 mt-1">Tech: {booking.technicianName}</p>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            {booking.status === "confirmed" || booking.status === "pending_verification" ? (
+                              <Button size="sm" onClick={() => setSelectedBooking(booking)}>Assign</Button>
+                            ) : (
+                              <Button size="sm" variant="outline" disabled>
+                                {booking.status === "assigned" ? "Reassign" : "View"}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -470,6 +556,43 @@ export default function AdminDashboard() {
                 Application {selectedTech?.status}
               </Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Technician Modal */}
+      <Dialog open={!!selectedBooking} onOpenChange={(open) => !open && setSelectedBooking(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign Technician</DialogTitle>
+            <DialogDescription>Select a technician for {selectedBooking?.serviceName}</DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <Select value={assignTechId} onValueChange={setAssignTechId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Technician" />
+              </SelectTrigger>
+              <SelectContent>
+                {approvedTechnicians.length === 0 ? (
+                  <SelectItem value="none" disabled>No active technicians found</SelectItem>
+                ) : (
+                  approvedTechnicians.map(tech => (
+                    <SelectItem key={tech.id} value={tech.id}>
+                      {tech.fullName} ({tech.category})
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setSelectedBooking(null)}>Cancel</Button>
+            <Button onClick={handleAssignTechnician} disabled={!assignTechId || actionLoading}>
+              {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Assign Technician
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

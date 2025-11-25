@@ -17,8 +17,10 @@ import {
   ThumbsUp,
   AlertCircle,
   ArrowLeft,
+  ArrowRight,
   Calendar,
-  Loader2
+  Loader2,
+  Sparkles
 } from "lucide-react";
 
 export default function ServiceDetailsPage() {
@@ -46,7 +48,7 @@ export default function ServiceDetailsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
@@ -54,8 +56,8 @@ export default function ServiceDetailsPage() {
 
   if (!service) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold mb-4">Service Not Found</h1>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Service Not Found</h1>
         <Link href="/services" className="text-blue-600 hover:underline">
           Back to Services
         </Link>
@@ -64,9 +66,9 @@ export default function ServiceDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Link href="/services" className="inline-flex items-center text-sm text-gray-500 hover:text-blue-600 mb-6 transition-colors">
+        <Link href="/services" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 mb-8 transition-colors">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Services
         </Link>
@@ -75,35 +77,39 @@ export default function ServiceDetailsPage() {
           {/* Left Column - Service Info */}
           <div className="lg:col-span-2 space-y-8">
             {/* Hero Card */}
-            <Card className="border-none shadow-sm overflow-hidden">
-              <div className="h-64 bg-blue-100 dark:bg-gray-800 flex items-center justify-center text-8xl">
-                {service.image}
+            <Card className="border-none shadow-sm overflow-hidden rounded-3xl bg-white dark:bg-gray-900">
+              <div className="h-72 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center text-9xl relative">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                <span className="drop-shadow-lg transform hover:scale-105 transition-transform duration-500">{service.image}</span>
               </div>
               <CardContent className="p-8">
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-6">
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{service.title}</h1>
+                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">{service.title}</h1>
                     <div className="flex items-center space-x-4 text-sm">
-                      <div className="flex items-center text-yellow-500 font-medium">
+                      <div className="flex items-center bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded-lg text-yellow-600 dark:text-yellow-400 font-semibold">
                         <Star className="h-4 w-4 fill-current mr-1" />
                         {service.rating} ({service.reviews} reviews)
                       </div>
-                      <div className="text-gray-500">
+                      <div className="text-gray-500 flex items-center">
+                        <CheckCircle2 className="h-4 w-4 mr-1 text-green-500" />
                         {service.bookings} bookings
                       </div>
                     </div>
                   </div>
-                  <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-none">
+                  <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-none px-3 py-1 text-sm rounded-full">
                     Best Seller
                   </Badge>
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed text-lg">
                   {service.description}
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {service.features.map((feature, index) => (
-                    <div key={index} className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                    <div key={index} className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl">
+                      <div className="bg-white dark:bg-gray-700 p-1.5 rounded-full mr-3 shadow-sm">
+                        <CheckCircle2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </div>
                       {feature}
                     </div>
                   ))}
@@ -112,30 +118,30 @@ export default function ServiceDetailsPage() {
             </Card>
 
             {/* What's Included */}
-            <Card className="border-none shadow-sm">
+            <Card className="border-none shadow-sm rounded-3xl bg-white dark:bg-gray-900">
               <CardHeader>
-                <CardTitle>What&apos;s Included</CardTitle>
+                <CardTitle className="text-xl">What&apos;s Included</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-green-600 flex items-center">
-                      <ThumbsUp className="h-4 w-4 mr-2" /> Included
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4 bg-green-50 dark:bg-green-900/10 p-5 rounded-2xl">
+                    <h4 className="font-semibold text-green-700 dark:text-green-400 flex items-center">
+                      <ThumbsUp className="h-5 w-5 mr-2" /> Included
                     </h4>
-                    <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                      <li className="flex items-start"><CheckCircle2 className="h-4 w-4 text-green-500 mr-2 mt-0.5" /> Professional tools & chemicals</li>
-                      <li className="flex items-start"><CheckCircle2 className="h-4 w-4 text-green-500 mr-2 mt-0.5" /> Hard water stain removal</li>
-                      <li className="flex items-start"><CheckCircle2 className="h-4 w-4 text-green-500 mr-2 mt-0.5" /> Floor scrubbing & polishing</li>
+                    <ul className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+                      <li className="flex items-start"><CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5" /> Professional tools & chemicals</li>
+                      <li className="flex items-start"><CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5" /> Hard water stain removal</li>
+                      <li className="flex items-start"><CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5" /> Floor scrubbing & polishing</li>
                     </ul>
                   </div>
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-red-600 flex items-center">
-                      <AlertCircle className="h-4 w-4 mr-2" /> Excluded
+                  <div className="space-y-4 bg-red-50 dark:bg-red-900/10 p-5 rounded-2xl">
+                    <h4 className="font-semibold text-red-700 dark:text-red-400 flex items-center">
+                      <AlertCircle className="h-5 w-5 mr-2" /> Excluded
                     </h4>
-                    <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                      <li className="flex items-start"><span className="text-red-400 mr-2">×</span> Furniture moving</li>
-                      <li className="flex items-start"><span className="text-red-400 mr-2">×</span> Wet wall cleaning</li>
-                      <li className="flex items-start"><span className="text-red-400 mr-2">×</span> Chimney cleaning (Add-on)</li>
+                    <ul className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+                      <li className="flex items-start"><span className="text-red-500 mr-2 font-bold text-lg leading-none">×</span> Furniture moving</li>
+                      <li className="flex items-start"><span className="text-red-500 mr-2 font-bold text-lg leading-none">×</span> Wet wall cleaning</li>
+                      <li className="flex items-start"><span className="text-red-500 mr-2 font-bold text-lg leading-none">×</span> Chimney cleaning (Add-on)</li>
                     </ul>
                   </div>
                 </div>
@@ -145,45 +151,48 @@ export default function ServiceDetailsPage() {
 
           {/* Right Column - Booking Card */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24">
-              <Card className="border-none shadow-lg bg-white dark:bg-gray-900">
-                <CardHeader>
-                  <CardTitle>Select Package</CardTitle>
+            <div className="sticky top-24 space-y-6">
+              <Card className="border-none shadow-lg bg-white dark:bg-gray-900 rounded-3xl overflow-hidden ring-1 ring-gray-100 dark:ring-gray-800">
+                <CardHeader className="bg-gray-50 dark:bg-gray-800/50 pb-6">
+                  <CardTitle className="flex items-center">
+                    <Sparkles className="h-5 w-5 text-blue-600 mr-2" />
+                    Select Package
+                  </CardTitle>
                   <CardDescription>Choose the best plan for your home</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   <Tabs defaultValue="standard" onValueChange={setSelectedPackage} className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 mb-6">
-                      <TabsTrigger value="basic">Basic</TabsTrigger>
-                      <TabsTrigger value="standard">Standard</TabsTrigger>
-                      <TabsTrigger value="premium">Premium</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-3 mb-8 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
+                      <TabsTrigger value="basic" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm">Basic</TabsTrigger>
+                      <TabsTrigger value="standard" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm">Standard</TabsTrigger>
+                      <TabsTrigger value="premium" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm">Premium</TabsTrigger>
                     </TabsList>
 
                     {Object.entries(service.packages).map(([key, pkg]) => (
-                      <TabsContent key={key} value={key} className="space-y-6">
-                        <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="text-3xl font-bold text-gray-900 dark:text-white">₹{pkg.price}</div>
-                          <div className="text-sm text-gray-500 flex items-center justify-center mt-1">
-                            <Clock className="h-3 w-3 mr-1" /> {pkg.duration}
+                      <TabsContent key={key} value={key} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                        <div className="text-center p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800">
+                          <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">₹{pkg.price}</div>
+                          <div className="text-sm text-blue-600 dark:text-blue-300 flex items-center justify-center font-medium">
+                            <Clock className="h-4 w-4 mr-1.5" /> {pkg.duration}
                           </div>
                         </div>
 
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                           {pkg.features.map((feature, i) => (
                             <div key={i} className="flex items-start text-sm">
-                              <CheckCircle2 className="h-4 w-4 text-blue-500 mr-2 mt-0.5 flex-shrink-0" />
-                              <span className="text-gray-600 dark:text-gray-300">{feature}</span>
+                              <CheckCircle2 className="h-5 w-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+                              <span className="text-gray-700 dark:text-gray-300 font-medium">{feature}</span>
                             </div>
                           ))}
                         </div>
 
-                        <Button className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all" asChild>
-                          <Link href="/booking">
-                            Book Slot
+                        <Button className="w-full h-14 text-lg bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 shadow-xl hover:shadow-2xl transition-all rounded-full mt-4 group" asChild>
+                          <Link href={`/booking?serviceId=${service.id}&package=${key}`}>
+                            Book Slot <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                           </Link>
                         </Button>
 
-                        <p className="text-xs text-center text-gray-400">
+                        <p className="text-xs text-center text-gray-400 font-medium">
                           No payment required now. Pay after service.
                         </p>
                       </TabsContent>
@@ -192,11 +201,11 @@ export default function ServiceDetailsPage() {
                 </CardContent>
               </Card>
 
-              <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg flex items-start space-x-3">
-                <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div className="bg-blue-600 text-white p-5 rounded-2xl flex items-start space-x-4 shadow-lg">
+                <Shield className="h-6 w-6 mt-1 opacity-90" />
                 <div>
-                  <h4 className="font-semibold text-sm text-blue-900 dark:text-blue-200">Service Buddy Guarantee</h4>
-                  <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                  <h4 className="font-bold text-base mb-1">Service Buddy Guarantee</h4>
+                  <p className="text-sm text-blue-100 leading-relaxed">
                     Verified professionals, insurance coverage, and re-work assurance if not satisfied.
                   </p>
                 </div>

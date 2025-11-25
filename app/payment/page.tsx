@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import { Loader2, CreditCard, Wallet, Banknote, CheckCircle2, AlertCircle, Shiel
 import { useAuth } from "@/context/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { db } from "@/lib/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 
 declare global {
     interface Window {
@@ -22,16 +22,41 @@ declare global {
     }
 }
 
-export default function PaymentPage() {
+function PaymentContent() {
     const [paymentMethod, setPaymentMethod] = useState("card");
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState("");
-    const router = useRouter();
-    const { user } = useAuth();
+    const [booking, setBooking] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
-    // Mock booking data - in real app, get from state/context/url
-    const bookingAmount = 2648;
-    const serviceName = "Deep Home Cleaning";
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const { user } = useAuth();
+    const bookingId = searchParams.get("bookingId");
+
+    useEffect(() => {
+        const fetchBooking = async () => {
+            if (!bookingId) {
+                setLoading(false);
+                return;
+            }
+            try {
+                const docRef = doc(db, "bookings", bookingId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    setBooking({ id: docSnap.id, ...docSnap.data() });
+                } else {
+                    setError("Booking not found.");
+                }
+            } catch (err) {
+                console.error("Error fetching booking:", err);
+                setError("Failed to load booking details.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchBooking();
+    }, [bookingId]);
 
     const loadRazorpay = () => {
         return new Promise((resolve) => {
@@ -44,13 +69,14 @@ export default function PaymentPage() {
     };
 
     const handlePayment = async () => {
+        if (!booking) return;
         setIsProcessing(true);
         setError("");
 
         try {
             if (paymentMethod === "cash") {
                 // Handle Cash Payment
-                await createBooking("cash", "pending");
+                await updateBooking("cash", "pending_verification", "confirmed");
                 router.push("/payment/success");
                 return;
             }
@@ -65,7 +91,7 @@ export default function PaymentPage() {
             const orderRes = await fetch("/api/razorpay/order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount: bookingAmount }),
+                body: JSON.stringify({ amount: booking.amount }),
             });
 
             if (!orderRes.ok) throw new Error("Failed to create order");
@@ -76,11 +102,11 @@ export default function PaymentPage() {
                 amount: order.amount,
                 currency: order.currency,
                 name: "Service Buddy",
-                description: `Payment for ${serviceName}`,
+                description: `Payment for ${booking.serviceName}`,
                 order_id: order.id,
                 handler: async function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) {
-                    // Verify payment and create booking
-                    await createBooking("online", "paid", response);
+                    // Verify payment and update booking
+                    await updateBooking("online", "paid", "confirmed", response);
                     router.push("/payment/success");
                 },
                 prefill: {
@@ -104,29 +130,40 @@ export default function PaymentPage() {
         }
     };
 
-    const createBooking = async (method: string, status: string, paymentDetails?: unknown) => {
-        if (!user) return;
+    const updateBooking = async (method: string, paymentStatus: string, bookingStatus: string, paymentDetails?: unknown) => {
+        if (!bookingId) return;
 
         try {
-            const bookingData = {
-                userId: user.uid,
-                serviceName,
-                amount: bookingAmount,
+            const bookingRef = doc(db, "bookings", bookingId);
+            await updateDoc(bookingRef, {
                 paymentMethod: method,
-                paymentStatus: status,
+                paymentStatus: paymentStatus,
+                status: bookingStatus,
                 paymentDetails: paymentDetails || {},
-                date: new Date().toISOString(),
-                address: "123 Main St, Mumbai", // Mock address
-                status: "confirmed",
-                createdAt: new Date().toISOString(),
-            };
-
-            await addDoc(collection(db, "bookings"), bookingData);
+                updatedAt: new Date().toISOString()
+            });
         } catch (error) {
-            console.error("Error creating booking:", error);
-            throw new Error("Failed to create booking");
+            console.error("Error updating booking:", error);
+            throw new Error("Failed to update booking");
         }
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            </div>
+        );
+    }
+
+    if (!booking) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-950">
+                <h1 className="text-2xl font-bold mb-4">Invalid Booking</h1>
+                <Button asChild><Link href="/services">Back to Services</Link></Button>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
@@ -136,46 +173,46 @@ export default function PaymentPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Payment Methods */}
                     <div className="md:col-span-2 space-y-6">
-                        <Card className="border-none shadow-xl">
-                            <CardHeader>
+                        <Card className="border-none shadow-xl rounded-3xl overflow-hidden">
+                            <CardHeader className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
                                 <CardTitle>Select Payment Method</CardTitle>
                                 <CardDescription>Choose how you want to pay</CardDescription>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="p-6 bg-white dark:bg-gray-900">
                                 {error && (
-                                    <Alert variant="destructive" className="mb-4">
+                                    <Alert variant="destructive" className="mb-6 rounded-xl">
                                         <AlertCircle className="h-4 w-4" />
                                         <AlertDescription>{error}</AlertDescription>
                                     </Alert>
                                 )}
 
                                 <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-4">
-                                    <div className={`flex items-center space-x-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${paymentMethod === "card" ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20" : "border-gray-200 dark:border-gray-700 hover:border-gray-300"}`}>
+                                    <div className={`flex items-center space-x-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === "card" ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20" : "border-gray-200 dark:border-gray-800 hover:border-gray-300"}`}>
                                         <RadioGroupItem value="card" id="card" />
                                         <Label htmlFor="card" className="flex-1 flex items-center cursor-pointer">
                                             <CreditCard className="h-5 w-5 mr-3 text-blue-600" />
                                             <div>
-                                                <p className="font-semibold">Pay Online</p>
+                                                <p className="font-semibold text-base">Pay Online</p>
                                                 <p className="text-sm text-gray-500">Credit/Debit Card, UPI, Netbanking</p>
                                             </div>
                                         </Label>
                                     </div>
 
-                                    <div className={`flex items-center space-x-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${paymentMethod === "cash" ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20" : "border-gray-200 dark:border-gray-700 hover:border-gray-300"}`}>
+                                    <div className={`flex items-center space-x-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === "cash" ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20" : "border-gray-200 dark:border-gray-800 hover:border-gray-300"}`}>
                                         <RadioGroupItem value="cash" id="cash" />
                                         <Label htmlFor="cash" className="flex-1 flex items-center cursor-pointer">
                                             <Banknote className="h-5 w-5 mr-3 text-green-600" />
                                             <div>
-                                                <p className="font-semibold">Pay After Service</p>
+                                                <p className="font-semibold text-base">Pay After Service</p>
                                                 <p className="text-sm text-gray-500">Cash or UPI after job completion</p>
                                             </div>
                                         </Label>
                                     </div>
                                 </RadioGroup>
                             </CardContent>
-                            <CardFooter className="pt-0">
+                            <CardFooter className="p-6 bg-gray-50/50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
                                 <Button
-                                    className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700"
+                                    className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg hover:shadow-blue-500/25"
                                     onClick={handlePayment}
                                     disabled={isProcessing}
                                 >
@@ -185,7 +222,7 @@ export default function PaymentPage() {
                                             Processing...
                                         </>
                                     ) : (
-                                        `Pay ₹${bookingAmount}`
+                                        `Pay ₹${booking.amount}`
                                     )}
                                 </Button>
                             </CardFooter>
@@ -194,22 +231,26 @@ export default function PaymentPage() {
 
                     {/* Order Summary */}
                     <div className="space-y-6">
-                        <Card className="border-none shadow-xl">
-                            <CardHeader>
+                        <Card className="border-none shadow-xl rounded-3xl overflow-hidden">
+                            <CardHeader className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
                                 <CardTitle>Order Summary</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
+                            <CardContent className="space-y-4 p-6 bg-white dark:bg-gray-900">
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-gray-500">Service Total</span>
-                                    <span>₹{bookingAmount}</span>
+                                    <span className="text-gray-500">Service</span>
+                                    <span className="font-medium text-right">{booking.serviceName}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-gray-500">Taxes & Fees</span>
-                                    <span>₹0</span>
+                                    <span className="text-gray-500">Package</span>
+                                    <span className="font-medium capitalize">{booking.package}</span>
                                 </div>
-                                <div className="border-t pt-4 flex justify-between font-bold text-lg">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-500">Date</span>
+                                    <span className="font-medium">{new Date(booking.date).toLocaleDateString()}</span>
+                                </div>
+                                <div className="border-t border-gray-100 dark:border-gray-800 pt-4 flex justify-between font-bold text-lg">
                                     <span>Total</span>
-                                    <span>₹{bookingAmount}</span>
+                                    <span>₹{booking.amount}</span>
                                 </div>
                             </CardContent>
                         </Card>
@@ -222,5 +263,17 @@ export default function PaymentPage() {
                 </div>
             </div >
         </div >
+    );
+}
+
+export default function PaymentPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            </div>
+        }>
+            <PaymentContent />
+        </Suspense>
     );
 }

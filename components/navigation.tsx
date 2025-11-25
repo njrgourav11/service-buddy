@@ -37,58 +37,52 @@ import {
 
 const serviceCategories = [
   {
-    name: "Home Cleaning",
+    name: "Cleaning",
     icon: <Home className="h-5 w-5" />,
     services: ["Deep Cleaning", "Regular Cleaning", "Move-in/Move-out", "Carpet Cleaning"],
-    href: "/service/home-cleaning"
+    href: "/services?category=Cleaning"
   },
   {
     name: "Plumbing",
     icon: <Droplets className="h-5 w-5" />,
     services: ["Leak Repair", "Pipe Installation", "Drain Cleaning", "Water Heater"],
-    href: "/service/plumbing"
+    href: "/services?category=Plumbing"
   },
   {
     name: "Electrical",
     icon: <Zap className="h-5 w-5" />,
     services: ["Wiring", "Lighting", "Switches", "Safety Inspection"],
-    href: "/service/electrical"
+    href: "/services?category=Electrical"
   },
   {
-    name: "Appliance Repair",
+    name: "Appliance",
     icon: <Wrench className="h-5 w-5" />,
     services: ["AC Repair", "Refrigerator", "Washing Machine", "Microwave"],
-    href: "/service/appliance-repair"
+    href: "/services?category=Appliance"
   },
   {
-    name: "Pest Control",
+    name: "Home Repair",
     icon: <Star className="h-5 w-5" />,
-    services: ["Termite Control", "Rodent Removal", "General Pest", "Disinfection"],
-    href: "/service/pest-control"
+    services: ["Furniture Assembly", "Carpentry", "Painting", "General Repair"],
+    href: "/services?category=Home%20Repair"
   },
   {
     name: "Gardening",
     icon: <Leaf className="h-5 w-5" />,
     services: ["Lawn Care", "Planting", "Garden Design", "Tree Service"],
-    href: "/service/gardening"
+    href: "/services?category=Gardening"
   },
   {
-    name: "Beauty & Salon",
+    name: "Beauty",
     icon: <Scissors className="h-5 w-5" />,
     services: ["Hair Cut", "Spa", "Massage", "Makeup"],
-    href: "/service/beauty-salon"
+    href: "/services?category=Beauty"
   },
   {
-    name: "Car Services",
-    icon: <Car className="h-5 w-5" />,
-    services: ["Car Wash", "Detailing", "Repair", "Towing"],
-    href: "/service/car-services"
-  },
-  {
-    name: "Health & Fitness",
+    name: "Wellness",
     icon: <Heart className="h-5 w-5" />,
     services: ["Personal Training", "Yoga", "Nutrition", "Massage"],
-    href: "/service/health-fitness"
+    href: "/services?category=Wellness"
   }
 ]
 

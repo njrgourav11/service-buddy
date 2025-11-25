@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, User, Mail, Lock, Phone, AlertCircle } from "lucide-react";
+import { Loader2, User, Mail, Lock, Phone, AlertCircle, Sparkles } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OTPInput } from "@/components/ui/otp-input";
 
@@ -163,26 +163,30 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 p-4">
-      <Card className="w-full max-w-md border-none shadow-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Create Account</CardTitle>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4 py-12">
+      <Card className="w-full max-w-md border-none shadow-xl bg-white dark:bg-gray-900 rounded-3xl overflow-hidden">
+        <div className="h-2 bg-gradient-to-r from-blue-600 to-purple-600 w-full" />
+        <CardHeader className="space-y-1 text-center pt-8">
+          <div className="mx-auto bg-blue-50 dark:bg-blue-900/20 p-3 rounded-2xl w-fit mb-4">
+            <Sparkles className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          </div>
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Create Account</CardTitle>
           <CardDescription className="text-gray-500 dark:text-gray-400">
             Join Service Buddy today
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-8 pb-8">
           {error && (
-            <Alert variant="destructive" className="mb-4">
+            <Alert variant="destructive" className="mb-6 rounded-xl">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           <Tabs defaultValue="email" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="email" disabled={step !== "method"}>Email</TabsTrigger>
-              <TabsTrigger value="phone" disabled={step !== "method"}>Phone</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-6 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
+              <TabsTrigger value="email" disabled={step !== "method"} className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm">Email</TabsTrigger>
+              <TabsTrigger value="phone" disabled={step !== "method"} className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm">Phone</TabsTrigger>
             </TabsList>
 
             <TabsContent value="email">
@@ -190,26 +194,26 @@ export default function RegisterPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First name</Label>
-                    <Input id="firstName" name="firstName" placeholder="John" required />
+                    <Input id="firstName" name="firstName" placeholder="John" required className="h-11 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last name</Label>
-                    <Input id="lastName" name="lastName" placeholder="Doe" required />
+                    <Input id="lastName" name="lastName" placeholder="Doe" required className="h-11 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" name="email" type="email" placeholder="name@example.com" required />
+                  <Input id="email" name="email" type="email" placeholder="name@example.com" required className="h-11 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" name="phone" placeholder="+91 98765 43210" required />
+                  <Input id="phone" name="phone" placeholder="+91 98765 43210" required className="h-11 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input id="password" name="password" type="password" required />
+                  <Input id="password" name="password" type="password" required className="h-11 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700" />
                 </div>
-                <Button className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25" disabled={isLoading}>
+                <Button className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg hover:shadow-blue-500/25 transition-all" disabled={isLoading}>
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Create Account"}
                 </Button>
               </form>
@@ -227,7 +231,7 @@ export default function RegisterPage() {
                         name="phone"
                         type="tel"
                         placeholder="98765 43210"
-                        className="pl-10 h-11"
+                        className="pl-10 h-11 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         required
@@ -235,7 +239,7 @@ export default function RegisterPage() {
                     </div>
                   </div>
                   <div id="recaptcha-container-register"></div>
-                  <Button className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25" disabled={isLoading}>
+                  <Button className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg hover:shadow-blue-500/25 transition-all" disabled={isLoading}>
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Send OTP"}
                   </Button>
                 </form>
@@ -251,7 +255,7 @@ export default function RegisterPage() {
                   <OTPInput length={6} onComplete={setOtp} />
 
                   <Button
-                    className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
+                    className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg hover:shadow-blue-500/25 transition-all"
                     onClick={handleVerifyOtp}
                     disabled={isLoading || otp.length !== 6}
                   >
@@ -265,18 +269,18 @@ export default function RegisterPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="firstName">First name</Label>
-                      <Input id="firstName" name="firstName" placeholder="John" required />
+                      <Input id="firstName" name="firstName" placeholder="John" required className="h-11 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lastName">Last name</Label>
-                      <Input id="lastName" name="lastName" placeholder="Doe" required />
+                      <Input id="lastName" name="lastName" placeholder="Doe" required className="h-11 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700" />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email (Optional)</Label>
-                    <Input id="email" name="email" type="email" placeholder="name@example.com" />
+                    <Input id="email" name="email" type="email" placeholder="name@example.com" className="h-11 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700" />
                   </div>
-                  <Button className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25" disabled={isLoading}>
+                  <Button className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg hover:shadow-blue-500/25 transition-all" disabled={isLoading}>
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Complete Registration"}
                   </Button>
                 </form>
@@ -284,34 +288,34 @@ export default function RegisterPage() {
             </TabsContent>
           </Tabs>
 
-          <div className="relative my-6">
+          <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-200 dark:border-gray-700" />
+              <span className="w-full border-t border-gray-100 dark:border-gray-800" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white dark:bg-gray-900 px-2 text-gray-500">Or continue with</span>
+              <span className="bg-white dark:bg-gray-900 px-2 text-gray-400">Or continue with</span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" type="button" disabled>
+            <Button variant="outline" type="button" disabled className="rounded-xl h-11 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
               Google
             </Button>
-            <Button variant="outline" type="button" disabled>
+            <Button variant="outline" type="button" disabled className="rounded-xl h-11 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
               Facebook
             </Button>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4 justify-center">
+        <CardFooter className="flex flex-col space-y-4 justify-center pb-8 bg-gray-50/50 dark:bg-gray-800/50 pt-6">
           <p className="text-sm text-gray-500">
             Already have an account?{" "}
-            <Link href="/auth/login" className="text-blue-600 hover:underline">
+            <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
               Login
             </Link>
           </p>
-          <div className="text-center border-t pt-4 w-full">
+          <div className="text-center border-t border-gray-200 dark:border-gray-700 pt-4 w-full">
             <p className="text-sm text-gray-500 mb-2">Want to join as a Professional?</p>
-            <Button variant="outline" className="w-full" asChild>
+            <Button variant="outline" className="w-full rounded-xl border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800" asChild>
               <Link href="/technician/onboarding">
                 Register as Technician
               </Link>
