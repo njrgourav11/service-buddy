@@ -191,7 +191,7 @@ export default function ProfilePage() {
                     bookings.map((booking) => (
                       <Card key={booking.id}>
                         <CardContent className="p-6">
-                          <div className="flex justify-between items-start">
+                          <div className="flex justify-between items-start mb-4">
                             <div>
                               <h3 className="font-bold text-lg mb-1">{booking.serviceName}</h3>
                               <div className="flex items-center text-sm text-gray-500 mb-2">
@@ -204,12 +204,27 @@ export default function ProfilePage() {
                                 <MapPin className="h-4 w-4 mr-1" />
                                 {booking.address}
                               </div>
+                              {booking.status === "accepted" && booking.technicianName && (
+                                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-100 dark:border-blue-800">
+                                  <p className="text-xs text-blue-800 dark:text-blue-300 font-semibold mb-2">Assigned Technician</p>
+                                  <div className="flex items-center">
+                                    <div className="h-8 w-8 rounded-full bg-blue-200 flex items-center justify-center text-sm font-bold mr-3 text-blue-800">
+                                      {booking.technicianName[0]}
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-medium">{booking.technicianName}</p>
+                                      <p className="text-xs text-gray-500">{booking.technicianPhone}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                             <div className="text-right">
                               <Badge className={
                                 booking.status === "completed" ? "bg-green-100 text-green-800" :
                                   booking.status === "confirmed" ? "bg-blue-100 text-blue-800" :
-                                    "bg-yellow-100 text-yellow-800"
+                                    booking.status === "accepted" ? "bg-purple-100 text-purple-800" :
+                                      "bg-yellow-100 text-yellow-800"
                               }>
                                 {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                               </Badge>
@@ -382,6 +397,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
