@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { TestimonialsColumn } from "@/components/ui/testimonials-columns";
+import { BentoGrid, type BentoItem } from "@/components/ui/bento-grid";
 import {
   Star,
   Shield,
@@ -121,6 +122,43 @@ export default function Home() {
   const testimonialsColumn1 = testimonials.slice(0, 3);
   const testimonialsColumn2 = testimonials.slice(3, 6);
   const testimonialsColumn3 = testimonials.slice(6, 9);
+
+  const bentoItems: BentoItem[] = [
+    {
+      title: "Verified Professionals",
+      meta: "5000+ experts",
+      description: "Background-checked and trained professionals ready to serve you with excellence",
+      icon: <Shield className="w-4 h-4 text-blue-500" />,
+      status: "Verified",
+      tags: ["Trusted", "Certified"],
+      colSpan: 2,
+      hasPersistentHover: true,
+    },
+    {
+      title: "On-Time Service",
+      meta: "98% on-time",
+      description: "Punctual service delivery with real-time tracking and updates",
+      icon: <Clock className="w-4 h-4 text-emerald-500" />,
+      status: "Guaranteed",
+      tags: ["Reliable", "Tracked"],
+    },
+    {
+      title: "Quality Assured",
+      meta: "4.8★ rating",
+      description: "Consistently high-quality service with customer satisfaction guarantee",
+      icon: <Star className="w-4 h-4 text-yellow-500" />,
+      tags: ["Excellence", "Rated"],
+      colSpan: 2,
+    },
+    {
+      title: "24/7 Support",
+      meta: "Always here",
+      description: "Round-the-clock customer support for all your queries and concerns",
+      icon: <Users className="w-4 h-4 text-purple-500" />,
+      status: "Live",
+      tags: ["Support", "Help"],
+    },
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-gray-950">
@@ -237,34 +275,14 @@ export default function Home() {
       {/* Why Choose Us */}
       <section className="py-24 bg-white dark:bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Why Service Buddy?</h2>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               We are committed to providing the best home service experience.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="border-gray-100 dark:border-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300 bg-white dark:bg-gray-900 rounded-3xl group hover:-translate-y-1 relative">
-                <GlowingEffect
-                  spread={35}
-                  glow={true}
-                  disabled={false}
-                  proximity={70}
-                  inactiveZone={0.01}
-                  borderWidth={2}
-                />
-                <CardContent className="p-8 text-center">
-                  <div className="bg-blue-50 dark:bg-blue-900/20 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <BentoGrid items={bentoItems} />
         </div>
       </section>
 

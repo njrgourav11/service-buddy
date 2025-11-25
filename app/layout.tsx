@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Navigation } from "@/components/navigation";
+import { Header } from "@/components/ui/header";
 import { Footer } from "@/components/footer";
 import { AuthProvider } from "@/context/AuthContext";
 
@@ -33,8 +33,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <Navigation />
-            <main className="min-h-screen pt-20">
+            <Header />
+            <main className="min-h-screen">
               {children}
             </main>
             <Footer />
