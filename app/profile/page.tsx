@@ -1,338 +1,387 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/context/AuthContext";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   User,
-  Calendar,
-  Star,
-  Settings,
-  Bell,
-  CreditCard,
-  HelpCircle,
-  LogOut,
-  Edit,
-  Camera,
   MapPin,
-  Phone,
-  Mail
-} from "lucide-react"
-
-import { Footer } from "@/components/footer"
-import { Navigation } from "@/components/navigation"
+  Calendar,
+  Clock,
+  LogOut,
+  Loader2,
+  Plus,
+  Pencil,
+  Trash2
+} from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs, doc, updateDoc, addDoc, deleteDoc } from "firebase/firestore";
+import { updateProfile } from "firebase/auth";
 
 export default function ProfilePage() {
-  const [isEditing, setIsEditing] = useState(false)
-  const [user, setUser] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+91 9876543210",
-    location: "Berhampur, Odisha",
-    joinDate: "January 2024",
-    avatar: ""
-  })
+  const { user, loading: authLoading } = useAuth();
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loadingBookings, setLoadingBookings] = useState(true);
 
-  const bookingHistory = [
-    {
-      id: "BK001",
-      service: "Home Cleaning",
-      date: "2024-01-15",
-      status: "Completed",
-      amount: "₹299",
-      provider: "Rajesh Kumar"
-    },
-    {
-      id: "BK002",
-      service: "Plumbing Repair",
-      date: "2024-01-10",
-      status: "Completed",
-      amount: "₹199",
-      provider: "Amit Singh"
-    },
-    {
-      id: "BK003",
-      service: "AC Service",
-      date: "2024-01-05",
-      status: "Upcoming",
-      amount: "₹399",
-      provider: "Vikram Patel"
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [loadingAddresses, setLoadingAddresses] = useState(true);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
+  const [profileForm, setProfileForm] = useState({ displayName: "", phone: "" });
+  const [addressForm, setAddressForm] = useState({ title: "", address: "", city: "", zip: "" });
+
+  useEffect(() => {
+    if (user) {
+      setProfileForm({
+        displayName: user.displayName || "",
+        phone: user.phoneNumber || "" // Note: phone might be in firestore user doc if not in auth
+      });
     }
-  ]
+  }, [user]);
 
-  const handleSave = () => {
-    setIsEditing(false)
+  useEffect(() => {
+    const fetchData = async () => {
+      if (user) {
+        try {
+          // Fetch Bookings
+          const q = query(collection(db, "bookings"), where("userId", "==", user.uid));
+          const querySnapshot = await getDocs(q);
+          const bookingsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
+          setBookings(bookingsData);
+
+          // Fetch Addresses
+          const addressQuery = query(collection(db, `users/${user.uid}/addresses`));
+          const addressSnapshot = await getDocs(addressQuery);
+          const addressesData = addressSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
+          setAddresses(addressesData);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        } finally {
+          setLoadingBookings(false);
+          setLoadingAddresses(false);
+        }
+      } else {
+        setLoadingBookings(false);
+        setLoadingAddresses(false);
+      }
+    };
+
+    if (!authLoading) {
+      fetchData();
+    }
+  }, [user, authLoading]);
+
+  const handleUpdateProfile = async () => {
+    if (!user) return;
+    try {
+      await updateProfile(user, { displayName: profileForm.displayName });
+      // Also update in Firestore
+      await updateDoc(doc(db, "users", user.uid), {
+        firstName: profileForm.displayName.split(" ")[0],
+        lastName: profileForm.displayName.split(" ").slice(1).join(" "),
+        phone: profileForm.phone
+      });
+      setIsEditingProfile(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  };
+
+  const handleAddAddress = async () => {
+    if (!user) return;
+    try {
+      const newAddress = { ...addressForm, createdAt: new Date().toISOString() };
+      const docRef = await addDoc(collection(db, `users/${user.uid}/addresses`), newAddress);
+      setAddresses([...addresses, { id: docRef.id, ...newAddress }]);
+      setIsAddingAddress(false);
+      setAddressForm({ title: "", address: "", city: "", zip: "" });
+    } catch (error) {
+      console.error("Error adding address:", error);
+    }
+  };
+
+  const handleDeleteAddress = async (id: string) => {
+    if (!user) return;
+    try {
+      await deleteDoc(doc(db, `users/${user.uid}/addresses`, id));
+      setAddresses(addresses.filter(addr => addr.id !== id));
+    } catch (error) {
+      console.error("Error deleting address:", error);
+    }
+  };
+
+  if (authLoading || loadingBookings) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <h1 className="text-2xl font-bold mb-4">Please Login</h1>
+        <Button asChild>
+          <a href="/auth/login">Login</a>
+        </Button>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-      <Navigation />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">My Profile</h1>
-          <p className="text-gray-600 dark:text-gray-400">Manage your account and preferences</p>
-        </motion.div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="lg:col-span-1"
-          >
-            <Card className="shadow-lg border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <div className="relative inline-block">
-                    <Avatar className="w-24 h-24 mx-auto mb-4 ring-4 ring-blue-100 dark:ring-blue-900">
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback className="text-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                        {user.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="absolute -bottom-1 -right-1 rounded-full w-8 h-8 p-0 bg-white dark:bg-gray-800 shadow-lg"
-                    >
-                      <Camera className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{user.name}</h2>
-                  <p className="text-gray-500 text-sm mb-3">Member since {user.joinDate}</p>
-                  <div className="flex items-center justify-center mb-4">
-                    <div className="flex items-center bg-yellow-50 dark:bg-yellow-900/20 px-3 py-1 rounded-full">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-                      <span className="text-sm font-medium text-yellow-700 dark:text-yellow-300">4.8</span>
-                      <span className="text-xs text-gray-500 ml-1">(12 reviews)</span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 text-center">
-                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                      <div className="text-lg font-bold text-blue-600 dark:text-blue-400">12</div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Bookings</div>
-                    </div>
-                    <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
-                      <div className="text-lg font-bold text-green-600 dark:text-green-400">₹2.8K</div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Spent</div>
-                    </div>
-                  </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar */}
+          <Card className="lg:col-span-1 h-fit">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center text-center mb-6">
+                <Avatar className="h-24 w-24 mb-4">
+                  <AvatarImage src={user.photoURL || ""} />
+                  <AvatarFallback>{user.displayName?.charAt(0) || "U"}</AvatarFallback>
+                </Avatar>
+                <h2 className="text-xl font-bold">{user.displayName || "User"}</h2>
+                <p className="text-sm text-gray-500">{user.email}</p>
+              </div>
+              <div className="space-y-2">
+                <Button variant="ghost" className="w-full justify-start">
+                  <User className="mr-2 h-4 w-4" /> Profile
+                </Button>
+                <Button variant="ghost" className="w-full justify-start">
+                  <Calendar className="mr-2 h-4 w-4" /> My Bookings
+                </Button>
+                <Button variant="ghost" className="w-full justify-start">
+                  <MapPin className="mr-2 h-4 w-4" /> Addresses
+                </Button>
+                <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50">
+                  <LogOut className="mr-2 h-4 w-4" /> Logout
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            <Tabs defaultValue="bookings" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-8">
+                <TabsTrigger value="bookings">My Bookings</TabsTrigger>
+                <TabsTrigger value="profile">Profile Details</TabsTrigger>
+                <TabsTrigger value="addresses">Saved Addresses</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="bookings">
+                <div className="space-y-4">
+                  {bookings.length === 0 ? (
+                    <Card>
+                      <CardContent className="p-8 text-center text-gray-500">
+                        No bookings found.
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    bookings.map((booking) => (
+                      <Card key={booking.id}>
+                        <CardContent className="p-6">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-bold text-lg mb-1">{booking.serviceName}</h3>
+                              <div className="flex items-center text-sm text-gray-500 mb-2">
+                                <Calendar className="h-4 w-4 mr-1" />
+                                {new Date(booking.date).toLocaleDateString()}
+                                <Clock className="h-4 w-4 ml-4 mr-1" />
+                                {new Date(booking.date).toLocaleTimeString()}
+                              </div>
+                              <div className="flex items-center text-sm text-gray-500">
+                                <MapPin className="h-4 w-4 mr-1" />
+                                {booking.address}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Badge className={
+                                booking.status === "completed" ? "bg-green-100 text-green-800" :
+                                  booking.status === "confirmed" ? "bg-blue-100 text-blue-800" :
+                                    "bg-yellow-100 text-yellow-800"
+                              }>
+                                {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                              </Badge>
+                              <p className="font-bold mt-2">₹{booking.amount}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
                 </div>
+              </TabsContent>
 
-                <Separator className="my-6" />
-
-                <nav className="space-y-1">
-                  <Button variant="ghost" className="w-full justify-start bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">
-                    <User className="h-4 w-4 mr-3" />
-                    Profile
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <Calendar className="h-4 w-4 mr-3" />
-                    My Bookings
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <CreditCard className="h-4 w-4 mr-3" />
-                    Payment Methods
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <Bell className="h-4 w-4 mr-3" />
-                    Notifications
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <Settings className="h-4 w-4 mr-3" />
-                    Settings
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <HelpCircle className="h-4 w-4 mr-3" />
-                    Help & Support
-                  </Button>
-                  <Separator className="my-4" />
-                  <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
-                    <LogOut className="h-4 w-4 mr-3" />
-                    Logout
-                  </Button>
-                </nav>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <div className="lg:col-span-3 space-y-6">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card className="shadow-lg border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-                <CardHeader>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <TabsContent value="profile">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle className="text-xl text-gray-900 dark:text-white">Profile Information</CardTitle>
-                      <CardDescription>Manage your personal details and preferences</CardDescription>
+                      <CardTitle>Profile Details</CardTitle>
+                      <CardDescription>Manage your personal information</CardDescription>
                     </div>
-                    <Button
-                      variant={isEditing ? "default" : "outline"}
-                      onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-                      className={isEditing ? "bg-blue-600 hover:bg-blue-700" : ""}
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      {isEditing ? 'Save Changes' : 'Edit Profile'}
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="flex items-center text-sm font-medium">
-                        <User className="h-4 w-4 mr-2 text-gray-500" />
-                        Full Name
-                      </Label>
-                      <Input
-                        id="name"
-                        value={user.name}
-                        onChange={(e) => setUser({...user, name: e.target.value})}
-                        disabled={!isEditing}
-                        className={isEditing ? "border-blue-300 focus:border-blue-500" : ""}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="flex items-center text-sm font-medium">
-                        <Mail className="h-4 w-4 mr-2 text-gray-500" />
-                        Email Address
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={user.email}
-                        onChange={(e) => setUser({...user, email: e.target.value})}
-                        disabled={!isEditing}
-                        className={isEditing ? "border-blue-300 focus:border-blue-500" : ""}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="flex items-center text-sm font-medium">
-                        <Phone className="h-4 w-4 mr-2 text-gray-500" />
-                        Phone Number
-                      </Label>
-                      <Input
-                        id="phone"
-                        value={user.phone}
-                        onChange={(e) => setUser({...user, phone: e.target.value})}
-                        disabled={!isEditing}
-                        className={isEditing ? "border-blue-300 focus:border-blue-500" : ""}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="location" className="flex items-center text-sm font-medium">
-                        <MapPin className="h-4 w-4 mr-2 text-gray-500" />
-                        Location
-                      </Label>
-                      <Input
-                        id="location"
-                        value={user.location}
-                        onChange={(e) => setUser({...user, location: e.target.value})}
-                        disabled={!isEditing}
-                        className={isEditing ? "border-blue-300 focus:border-blue-500" : ""}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <Card className="shadow-lg border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl text-gray-900 dark:text-white">Recent Bookings</CardTitle>
-                  <CardDescription>Your service booking history</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {bookingHistory.map((booking, index) => (
-                      <motion.div 
-                        key={booking.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 + index * 0.1 }}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-gray-100 dark:border-gray-700 rounded-xl hover:shadow-md transition-all duration-200 bg-white/50 dark:bg-gray-800/50"
-                      >
-                        <div className="flex items-center space-x-4 mb-3 sm:mb-0">
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <Calendar className="h-6 w-6 text-white" />
+                    <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Pencil className="h-4 w-4 mr-2" /> Edit
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Edit Profile</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="name">Full Name</Label>
+                            <Input
+                              id="name"
+                              value={profileForm.displayName}
+                              onChange={(e) => setProfileForm({ ...profileForm, displayName: e.target.value })}
+                            />
                           </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-900 dark:text-white">{booking.service}</h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              {booking.date} • {booking.provider}
-                            </p>
+                          <div className="space-y-2">
+                            <Label htmlFor="phone">Phone</Label>
+                            <Input
+                              id="phone"
+                              value={profileForm.phone}
+                              onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                            />
                           </div>
                         </div>
-                        <div className="flex items-center justify-between sm:flex-col sm:items-end sm:text-right">
-                          <div className="font-bold text-lg text-gray-900 dark:text-white">{booking.amount}</div>
-                          <Badge
-                            variant={booking.status === 'Completed' ? 'default' : 'secondary'}
-                            className={booking.status === 'Completed' 
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
-                              : 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400'
-                            }
-                          >
-                            {booking.status}
-                          </Badge>
+                        <DialogFooter>
+                          <Button onClick={handleUpdateProfile}>Save Changes</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Full Name</label>
+                        <div className="p-2 border rounded-md bg-gray-50 dark:bg-gray-900">
+                          {user.displayName || "Not set"}
                         </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                  <div className="mt-6 text-center">
-                    <Button variant="outline" className="hover:bg-blue-50 hover:border-blue-300">
-                      View All Bookings
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Email</label>
+                        <div className="p-2 border rounded-md bg-gray-50 dark:bg-gray-900">
+                          {user.email}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Phone</label>
+                        <div className="p-2 border rounded-md bg-gray-50 dark:bg-gray-900">
+                          {profileForm.phone || "Not set"}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6"
-            >
-              <Card className="shadow-lg border-0 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold mb-2">12</div>
-                  <div className="text-blue-100">Total Bookings</div>
-                </CardContent>
-              </Card>
-              <Card className="shadow-lg border-0 bg-gradient-to-br from-green-500 to-green-600 text-white">
-                <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold mb-2">₹2,847</div>
-                  <div className="text-green-100">Total Spent</div>
-                </CardContent>
-              </Card>
-              <Card className="shadow-lg border-0 bg-gradient-to-br from-purple-500 to-purple-600 text-white sm:col-span-2 lg:col-span-1">
-                <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold mb-2">4.8</div>
-                  <div className="text-purple-100">Average Rating</div>
-                </CardContent>
-              </Card>
-            </motion.div>
+              <TabsContent value="addresses">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>Saved Addresses</CardTitle>
+                      <CardDescription>Manage your delivery addresses</CardDescription>
+                    </div>
+                    <Dialog open={isAddingAddress} onOpenChange={setIsAddingAddress}>
+                      <DialogTrigger asChild>
+                        <Button size="sm">
+                          <Plus className="h-4 w-4 mr-2" /> Add New
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Add New Address</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="title">Address Title (e.g. Home, Office)</Label>
+                            <Input
+                              id="title"
+                              placeholder="Home"
+                              value={addressForm.title}
+                              onChange={(e) => setAddressForm({ ...addressForm, title: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="address">Full Address</Label>
+                            <Textarea
+                              id="address"
+                              placeholder="123 Main St, Apt 4B"
+                              value={addressForm.address}
+                              onChange={(e) => setAddressForm({ ...addressForm, address: e.target.value })}
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="city">City</Label>
+                              <Input
+                                id="city"
+                                placeholder="Mumbai"
+                                value={addressForm.city}
+                                onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="zip">ZIP Code</Label>
+                              <Input
+                                id="zip"
+                                placeholder="400001"
+                                value={addressForm.zip}
+                                onChange={(e) => setAddressForm({ ...addressForm, zip: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button onClick={handleAddAddress}>Save Address</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingAddresses ? (
+                      <div className="flex justify-center p-4">
+                        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                      </div>
+                    ) : addresses.length === 0 ? (
+                      <p className="text-gray-500 text-center py-8">No addresses saved yet.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {addresses.map((addr) => (
+                          <div key={addr.id} className="border rounded-lg p-4 relative group">
+                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => handleDeleteAddress(addr.id)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <h4 className="font-bold mb-1">{addr.title}</h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{addr.address}</p>
+                            <p className="text-sm text-gray-500 mt-1">{addr.city}, {addr.zip}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
-      <Footer />
     </div>
-  )
+  );
 }
