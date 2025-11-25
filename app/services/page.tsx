@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { getServices, Service } from "@/lib/db/services";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 import {
   Search,
   Filter,
@@ -170,7 +171,15 @@ function ServicesContent() {
                   transition={{ duration: 0.3 }}
                 >
                   <Link href={`/service/${service.id}`}>
-                    <Card className="h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-none bg-white dark:bg-gray-900 group cursor-pointer rounded-3xl overflow-hidden shadow-sm ring-1 ring-gray-100 dark:ring-gray-800">
+                    <Card className="h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-none bg-white dark:bg-gray-900 group cursor-pointer rounded-3xl overflow-hidden shadow-sm ring-1 ring-gray-100 dark:ring-gray-800 relative">
+                      <GlowingEffect
+                        spread={45}
+                        glow={true}
+                        disabled={false}
+                        proximity={90}
+                        inactiveZone={0.01}
+                        borderWidth={2}
+                      />
                       <CardContent className="p-0">
                         <div className="h-52 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center text-7xl relative overflow-hidden group-hover:from-blue-100 dark:group-hover:from-gray-800 transition-colors">
                           <div className="absolute top-4 right-4 bg-white/90 dark:bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-semibold flex items-center shadow-sm">

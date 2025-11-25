@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
+import { TestimonialsColumn } from "@/components/ui/testimonials-columns";
 import {
   Star,
   Shield,
@@ -58,6 +60,67 @@ export default function Home() {
       description: "Dedicated support for all your queries"
     }
   ];
+
+  const testimonials = [
+    {
+      text: "ServiceBuddy made finding a reliable plumber so easy! The professional arrived on time and fixed our leak perfectly. Highly recommend!",
+      image: "https://randomuser.me/api/portraits/women/1.jpg",
+      name: "Priya Sharma",
+      role: "Homeowner",
+    },
+    {
+      text: "Excellent cleaning service! The team was thorough and professional. My home has never looked better. Will definitely book again.",
+      image: "https://randomuser.me/api/portraits/men/2.jpg",
+      name: "Rajesh Kumar",
+      role: "Apartment Owner",
+    },
+    {
+      text: "The electrician was knowledgeable and efficient. Fixed all our wiring issues in no time. Great service at a fair price!",
+      image: "https://randomuser.me/api/portraits/women/3.jpg",
+      name: "Anita Patel",
+      role: "Business Owner",
+    },
+    {
+      text: "AC repair service was outstanding. The technician diagnosed the problem quickly and had it running perfectly within an hour.",
+      image: "https://randomuser.me/api/portraits/men/4.jpg",
+      name: "Vikram Singh",
+      role: "Homeowner",
+    },
+    {
+      text: "Best home service platform I've used. Easy booking, professional service, and great customer support. Five stars!",
+      image: "https://randomuser.me/api/portraits/women/5.jpg",
+      name: "Meera Reddy",
+      role: "Regular Customer",
+    },
+    {
+      text: "The gardening service transformed our backyard. The team was creative, hardworking, and delivered beyond our expectations.",
+      image: "https://randomuser.me/api/portraits/women/6.jpg",
+      name: "Kavita Desai",
+      role: "Villa Owner",
+    },
+    {
+      text: "Painting service was impeccable. Clean work, attention to detail, and finished right on schedule. Very satisfied!",
+      image: "https://randomuser.me/api/portraits/men/7.jpg",
+      name: "Arjun Mehta",
+      role: "Homeowner",
+    },
+    {
+      text: "Salon service at home was a game-changer! Professional stylist, quality products, and so convenient. Love it!",
+      image: "https://randomuser.me/api/portraits/women/8.jpg",
+      name: "Sana Khan",
+      role: "Working Professional",
+    },
+    {
+      text: "Pest control service was thorough and effective. No more issues since the treatment. Highly professional team!",
+      image: "https://randomuser.me/api/portraits/men/9.jpg",
+      name: "Amit Verma",
+      role: "Homeowner",
+    },
+  ];
+
+  const testimonialsColumn1 = testimonials.slice(0, 3);
+  const testimonialsColumn2 = testimonials.slice(3, 6);
+  const testimonialsColumn3 = testimonials.slice(6, 9);
 
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-gray-950">
@@ -147,7 +210,15 @@ export default function Home() {
                 viewport={{ once: true }}
               >
                 <Link href={`/service/${category.id}`}>
-                  <Card className="h-full hover:shadow-xl transition-all duration-300 border-none bg-white dark:bg-gray-800 hover:-translate-y-2 rounded-3xl overflow-hidden group">
+                  <Card className="h-full hover:shadow-xl transition-all duration-300 border-none bg-white dark:bg-gray-800 hover:-translate-y-2 rounded-3xl overflow-hidden group relative">
+                    <GlowingEffect
+                      spread={40}
+                      glow={true}
+                      disabled={false}
+                      proximity={80}
+                      inactiveZone={0.01}
+                      borderWidth={2}
+                    />
                     <CardContent className="p-6 flex flex-col items-center text-center h-full justify-center relative">
                       <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 ${category.color.split(' ')[0]}`} />
                       <div className={`p-5 rounded-2xl mb-4 ${category.color} group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
@@ -175,7 +246,15 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="border-gray-100 dark:border-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300 bg-white dark:bg-gray-900 rounded-3xl group hover:-translate-y-1">
+              <Card key={index} className="border-gray-100 dark:border-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300 bg-white dark:bg-gray-900 rounded-3xl group hover:-translate-y-1 relative">
+                <GlowingEffect
+                  spread={35}
+                  glow={true}
+                  disabled={false}
+                  proximity={70}
+                  inactiveZone={0.01}
+                  borderWidth={2}
+                />
                 <CardContent className="p-8 text-center">
                   <div className="bg-blue-50 dark:bg-blue-900/20 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                     {feature.icon}
@@ -190,37 +269,31 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 bg-gray-50/50 dark:bg-gray-900/50 overflow-hidden">
+      <section className="py-24 bg-gray-50/50 dark:bg-gray-900/50 overflow-hidden relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Customer Stories</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400">See what our happy customers have to say</p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            viewport={{ once: true }}
+            className="flex flex-col items-center justify-center max-w-[540px] mx-auto mb-16"
+          >
+            <Badge variant="secondary" className="mb-4 px-4 py-2 text-sm font-medium bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm border border-gray-200 dark:border-gray-700 rounded-full">
+              Testimonials
+            </Badge>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="bg-white dark:bg-gray-800 border-none shadow-lg rounded-3xl hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
-                  <div className="flex items-center space-x-1 mb-6">
-                    {[...Array(5)].map((_, j) => (
-                      <Star key={j} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 dark:text-gray-300 mb-8 text-lg leading-relaxed italic">
-                    "Absolutely amazing service! The professional arrived on time and did a fantastic job. Highly recommended!"
-                  </p>
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                      SJ
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 dark:text-white">Sarah Johnson</h4>
-                      <p className="text-sm text-gray-500">Home Cleaning</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 text-center">
+              What our customers say
+            </h2>
+            <p className="text-center text-lg text-gray-600 dark:text-gray-400">
+              See what our happy customers have to say about us.
+            </p>
+          </motion.div>
+
+          <div className="flex justify-center gap-6 [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)] max-h-[740px] overflow-hidden">
+            <TestimonialsColumn testimonials={testimonialsColumn1} duration={15} />
+            <TestimonialsColumn testimonials={testimonialsColumn2} className="hidden md:block" duration={19} />
+            <TestimonialsColumn testimonials={testimonialsColumn3} className="hidden lg:block" duration={17} />
           </div>
         </div>
       </section>

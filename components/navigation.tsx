@@ -87,14 +87,14 @@ const serviceCategories = [
 ]
 
 const cities = [
-  "Mumbai", "Delhi", "Bangalore", "Chennai", "Pune", "Hyderabad", "Kolkata", "Ahmedabad",
-  "Jaipur", "Surat", "Lucknow", "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal"
+  "Berhampur", "Gopalpur", "Chikiti", "Konisi", "Chatrapur", "Bhubaneswar", "Cuttack", "Bargarh",
+  "Jajpur", "Sambalpur", "Balangir", "Balasore", "Bhadrak", "Thakurbari", "Baripada"
 ]
 
 export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCity, setSelectedCity] = useState("Mumbai")
+  const [selectedCity, setSelectedCity] = useState("Berhampur")
   const [locationOpen, setLocationOpen] = useState(false)
   const [servicesOpen, setServicesOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
