@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { format, addDays } from "date-fns";
+import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -15,17 +15,14 @@ import {
     ChevronLeft,
     ChevronRight,
     MapPin,
-    Clock,
     Calendar as CalendarIcon,
     CheckCircle2,
-    CreditCard,
     Plus,
     Loader2
 } from "lucide-react";
 import { getServiceById, Service } from "@/lib/db/services";
 import { useAuth } from "@/context/AuthContext";
-import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { createBooking } from "@/actions/booking";
 
 const steps = [
     { id: 1, title: "Select Slot" },
@@ -101,6 +98,7 @@ function BookingContent() {
         setProcessing(true);
 
         try {
+            const token = await user.getIdToken();
             const selectedPkg = service.packages[packageType];
             const amount = selectedPkg ? selectedPkg.price : service.price;
             const addressStr = savedAddresses.find(a => a.id === selectedAddress)?.address || "Custom Address";
@@ -115,16 +113,19 @@ function BookingContent() {
                 date: date?.toISOString(),
                 time: selectedTime,
                 address: addressStr,
-                status: "pending_payment",
-                technicianId: null,
-                createdAt: new Date().toISOString() // Using string for easier client handling
             };
 
-            const docRef = await addDoc(collection(db, "bookings"), bookingData);
-            router.push(`/payment?bookingId=${docRef.id}`);
+            const result = await createBooking(bookingData, token);
+
+            if (result.success) {
+                router.push(`/payment?bookingId=${result.bookingId}`);
+            } else {
+                alert(result.error || "Failed to create booking");
+            }
         } catch (error) {
             console.error("Error creating booking:", error);
             alert("Failed to create booking. Please try again.");
+        } finally {
             setProcessing(false);
         }
     };

@@ -3,17 +3,16 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Loader2, CreditCard, Wallet, Banknote, CheckCircle2, AlertCircle, Shield } from "lucide-react";
+import { Loader2, CreditCard, Banknote, AlertCircle, Shield } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
+import { createPaymentOrder, verifyPayment, updatePaymentStatusCash } from "@/actions/payment";
 
 declare global {
     interface Window {
@@ -41,6 +40,8 @@ function PaymentContent() {
                 return;
             }
             try {
+                // We can still read from client SDK for speed if rules allow read, or use server action
+                // For now keeping client read as rules likely allow user to read their own booking
                 const docRef = doc(db, "bookings", bookingId);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
@@ -69,15 +70,21 @@ function PaymentContent() {
     };
 
     const handlePayment = async () => {
-        if (!booking) return;
+        if (!booking || !user) return;
         setIsProcessing(true);
         setError("");
 
         try {
+            const token = await user.getIdToken();
+
             if (paymentMethod === "cash") {
                 // Handle Cash Payment
-                await updateBooking("cash", "pending_verification", "confirmed");
-                router.push("/payment/success");
+                const result = await updatePaymentStatusCash(booking.id, token);
+                if (result.success) {
+                    router.push("/payment/success");
+                } else {
+                    throw new Error(result.error);
+                }
                 return;
             }
 
@@ -87,15 +94,11 @@ function PaymentContent() {
                 throw new Error("Razorpay SDK failed to load. Are you online?");
             }
 
-            // Create Order
-            const orderRes = await fetch("/api/razorpay/order", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount: booking.amount }),
-            });
+            // Create Order via Server Action
+            const orderRes = await createPaymentOrder(booking.id, token);
 
-            if (!orderRes.ok) throw new Error("Failed to create order");
-            const order = await orderRes.json();
+            if (!orderRes.success) throw new Error(orderRes.error);
+            const order = orderRes.order;
 
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -105,9 +108,13 @@ function PaymentContent() {
                 description: `Payment for ${booking.serviceName}`,
                 order_id: order.id,
                 handler: async function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) {
-                    // Verify payment and update booking
-                    await updateBooking("online", "paid", "confirmed", response);
-                    router.push("/payment/success");
+                    // Verify payment and update booking via Server Action
+                    const verifyRes = await verifyPayment(booking.id, response, token);
+                    if (verifyRes.success) {
+                        router.push("/payment/success");
+                    } else {
+                        alert("Payment verification failed: " + verifyRes.error);
+                    }
                 },
                 prefill: {
                     name: user?.displayName || "",
@@ -127,24 +134,6 @@ function PaymentContent() {
             setError(err instanceof Error ? err.message : "Payment failed. Please try again.");
         } finally {
             setIsProcessing(false);
-        }
-    };
-
-    const updateBooking = async (method: string, paymentStatus: string, bookingStatus: string, paymentDetails?: unknown) => {
-        if (!bookingId) return;
-
-        try {
-            const bookingRef = doc(db, "bookings", bookingId);
-            await updateDoc(bookingRef, {
-                paymentMethod: method,
-                paymentStatus: paymentStatus,
-                status: bookingStatus,
-                paymentDetails: paymentDetails || {},
-                updatedAt: new Date().toISOString()
-            });
-        } catch (error) {
-            console.error("Error updating booking:", error);
-            throw new Error("Failed to update booking");
         }
     };
 
