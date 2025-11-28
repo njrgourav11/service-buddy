@@ -33,7 +33,9 @@ import {
   Leaf,
   Star,
   MapIcon,
-  X
+  X,
+  BookOpen,
+  Info
 } from "lucide-react"
 
 const serviceCategories = [
@@ -317,6 +319,22 @@ export function Navigation() {
                     </div>
 
                     <div className="border-t pt-6 space-y-4">
+                      <Link
+                        href="/blog"
+                        className="flex items-center space-x-3 p-2 font-medium"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <BookOpen className="h-5 w-5" />
+                        <span>Blog</span>
+                      </Link>
+                      <Link
+                        href="/about"
+                        className="flex items-center space-x-3 p-2 font-medium"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Info className="h-5 w-5" />
+                        <span>About</span>
+                      </Link>
                       <Link
                         href="/profile"
                         className="flex items-center space-x-3 p-2 font-medium"
