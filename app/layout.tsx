@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/ui/header";
 import { Footer } from "@/components/footer";
 import { AuthProvider } from "@/context/AuthContext";
+import { CartProvider } from "@/context/CartContext";
+import { ToastProvider } from "@/context/ToastContext";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -33,11 +35,15 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <Header />
-            <main className="min-h-screen">
-              {children}
-            </main>
-            <Footer />
+            <CartProvider>
+              <ToastProvider>
+                <Header />
+                <main className="min-h-screen">
+                  {children}
+                </main>
+                <Footer />
+              </ToastProvider>
+            </CartProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
