@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Navigation } from "@/components/navigation"
+
 import { Footer } from "@/components/footer"
 import {
   HelpCircle,
@@ -129,7 +129,7 @@ export default function SupportPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navigation />
+
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
@@ -269,7 +269,7 @@ export default function SupportPage() {
                           <Input
                             id="name"
                             value={contactForm.name}
-                            onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
+                            onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
                             required
                           />
                         </div>
@@ -279,7 +279,7 @@ export default function SupportPage() {
                             id="email"
                             type="email"
                             value={contactForm.email}
-                            onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
+                            onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                             required
                           />
                         </div>
@@ -291,14 +291,14 @@ export default function SupportPage() {
                           <Input
                             id="phone"
                             value={contactForm.phone}
-                            onChange={(e) => setContactForm({...contactForm, phone: e.target.value})}
+                            onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
                           />
                         </div>
                         <div>
                           <Label htmlFor="priority">Priority</Label>
                           <Select
                             value={contactForm.priority}
-                            onValueChange={(value) => setContactForm({...contactForm, priority: value})}
+                            onValueChange={(value) => setContactForm({ ...contactForm, priority: value })}
                           >
                             <SelectTrigger>
                               <SelectValue />
@@ -317,7 +317,7 @@ export default function SupportPage() {
                         <Label htmlFor="category">Category</Label>
                         <Select
                           value={contactForm.category}
-                          onValueChange={(value) => setContactForm({...contactForm, category: value})}
+                          onValueChange={(value) => setContactForm({ ...contactForm, category: value })}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -338,7 +338,7 @@ export default function SupportPage() {
                         <Input
                           id="subject"
                           value={contactForm.subject}
-                          onChange={(e) => setContactForm({...contactForm, subject: e.target.value})}
+                          onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
                           placeholder="Brief description of your issue"
                           required
                         />
@@ -349,7 +349,7 @@ export default function SupportPage() {
                         <Textarea
                           id="message"
                           value={contactForm.message}
-                          onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                          onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                           placeholder="Please provide details about your inquiry..."
                           rows={4}
                           required
