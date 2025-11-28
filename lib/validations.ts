@@ -9,6 +9,7 @@ export const bookingSchema = z.object({
     address: z.string().min(5, "Address must be at least 5 characters"),
     userId: z.string().optional(), // Can be inferred from token
     userName: z.string().optional(),
+    amount: z.number().min(0, "Amount is required"),
 });
 
 export const technicianSchema = z.object({

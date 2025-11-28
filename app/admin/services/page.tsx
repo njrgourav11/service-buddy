@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Edit, Trash2, Package, Loader2 } from "lucide-react";
+import { ServiceIcon } from "@/components/service-icon";
 
 export default function AdminServicesPage() {
     const { user, loading: authLoading } = useAuth();
@@ -148,14 +149,12 @@ export default function AdminServicesPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {services.map(service => (
                             <Card key={service.id} className="overflow-hidden">
-                                <div className="h-32 bg-gray-100 relative">
-                                    {service.image ? (
-                                        <img src={service.image} alt={service.title} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="flex items-center justify-center h-full text-gray-400">
-                                            <Package className="h-8 w-8" />
-                                        </div>
-                                    )}
+                                <div className="h-32 bg-gray-100 relative flex items-center justify-center">
+                                    <ServiceIcon
+                                        serviceId={service.id}
+                                        className="h-16 w-16 text-gray-500"
+                                        fallbackImage={service.image}
+                                    />
                                 </div>
                                 <CardContent className="p-4">
                                     <div className="flex justify-between items-start mb-2">

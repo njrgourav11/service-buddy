@@ -108,7 +108,10 @@ function BookingContent() {
         try {
             const token = await user.getIdToken();
             const selectedPkg = service.packages[packageType];
-            const amount = selectedPkg ? selectedPkg.price : service.price;
+            const price = selectedPkg ? selectedPkg.price : service.price;
+            const taxes = Math.round(price * 0.18);
+            const total = price + taxes;
+            const amount = total;
 
             let addressStr = "";
             if (selectedAddress === "new" && mapLocation) {

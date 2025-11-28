@@ -24,8 +24,9 @@ import {
   Loader2,
   Sparkles,
   LogIn,
-  UserPlus
+  UserPlus,
 } from "lucide-react";
+import { ServiceIcon } from "@/components/service-icon";
 
 export default function ServiceDetailsPage() {
   const params = useParams();
@@ -99,7 +100,13 @@ export default function ServiceDetailsPage() {
             <Card className="border-none shadow-sm overflow-hidden rounded-3xl bg-white dark:bg-gray-900">
               <div className="h-72 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center text-9xl relative">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-                <span className="drop-shadow-lg transform hover:scale-105 transition-transform duration-500">{service.image}</span>
+                <span className="drop-shadow-lg transform hover:scale-105 transition-transform duration-500">
+                  <ServiceIcon
+                    serviceId={service.id}
+                    className="h-32 w-32 text-blue-600 dark:text-blue-400"
+                    fallbackImage={service.image}
+                  />
+                </span>
               </div>
               <CardContent className="p-8">
                 <div className="flex justify-between items-start mb-6">

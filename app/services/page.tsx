@@ -19,6 +19,7 @@ import {
   Clock,
   Loader2,
 } from "lucide-react";
+import { ServiceIcon } from "@/components/service-icon";
 
 const categories = ["Cleaning", "Appliance", "Electrical", "Plumbing", "Home Repair", "Beauty", "Wellness", "Gardening"];
 
@@ -186,7 +187,13 @@ function ServicesContent() {
                             <Star className="h-3 w-3 text-yellow-500 fill-current mr-1" />
                             {service.rating}
                           </div>
-                          <span className="transform group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{service.image}</span>
+                          <span className="transform group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">
+                            <ServiceIcon
+                              serviceId={service.id}
+                              className="h-24 w-24 text-blue-600 dark:text-blue-400"
+                              fallbackImage={service.image}
+                            />
+                          </span>
                         </div>
                         <div className="p-6">
                           <div className="mb-3">
@@ -233,7 +240,7 @@ function ServicesContent() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 
