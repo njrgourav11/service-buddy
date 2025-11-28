@@ -58,11 +58,11 @@ export default function TechnicianLayout({ children }: { children: React.ReactNo
     }
 
     const sidebarItems = status === "approved" ? [
-        { icon: LayoutDashboard, label: "Overview", id: "overview", href: "/technician/dashboard/overview" },
+        { icon: LayoutDashboard, label: "Overview", id: "overview", href: "/technician/dashboard" },
         { icon: Briefcase, label: "Available Jobs", id: "available", href: "/technician/dashboard/available-jobs", notifs: availableCount },
         { icon: Calendar, label: "My Jobs", id: "my-jobs", href: "/technician/dashboard/my-jobs", notifs: myJobsCount },
     ] : [
-        { icon: LayoutDashboard, label: "Overview", id: "overview", href: "/technician/dashboard/overview" },
+        { icon: LayoutDashboard, label: "Overview", id: "overview", href: "/technician/dashboard" },
     ];
 
     return (

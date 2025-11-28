@@ -21,7 +21,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
     }
 
     const sidebarItems = [
-        { icon: LayoutDashboard, label: "Overview", id: "overview", href: "/manager/overview" },
+        { icon: LayoutDashboard, label: "Overview", id: "overview", href: "/manager/dashboard" },
         { icon: Calendar, label: "Bookings", id: "bookings", href: "/manager/bookings" },
         { icon: Briefcase, label: "Technicians", id: "technicians", href: "/manager/technicians" },
     ];

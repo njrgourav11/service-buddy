@@ -5,7 +5,6 @@ import {
     ChevronsRight,
     Moon,
     Sun,
-    Bell,
     User,
     LogOut,
     Menu,
@@ -26,12 +25,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
 import { motion, AnimatePresence } from "framer-motion";
+import { NotificationBell } from "@/components/notification-bell";
 
 import { usePathname } from "next/navigation";
 
@@ -89,44 +84,6 @@ export const DashboardLayout = ({
         >
             {mounted && theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </Button>
-    );
-
-    // Reusable Notification Button
-    const NotificationButton = () => (
-        <Popover>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 relative"
-                    title="Notifications"
-                >
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-900" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80" align="end">
-                <div className="grid gap-4">
-                    <div className="space-y-2">
-                        <h4 className="font-medium leading-none">Notifications</h4>
-                        <p className="text-sm text-muted-foreground">
-                            You have 3 unread messages.
-                        </p>
-                    </div>
-                    <div className="grid gap-2">
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="flex items-start gap-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer">
-                                <div className="h-2 w-2 mt-2 rounded-full bg-blue-500 shrink-0" />
-                                <div>
-                                    <p className="text-sm font-medium">New booking request</p>
-                                    <p className="text-xs text-gray-500">2 minutes ago</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </PopoverContent>
-        </Popover>
     );
 
     const SidebarContent = ({ open = true }: { open?: boolean }) => (
@@ -269,9 +226,9 @@ export const DashboardLayout = ({
                     >
                         <div className="space-y-1 mt-1">
                             {[
-                                { label: "Admin", href: "/admin", icon: LayoutDashboard },
-                                { label: "Manager", href: "/manager", icon: User },
-                                { label: "Technician", href: "/technician", icon: Menu },
+                                { label: "Admin", href: "/admin/dashboard", icon: LayoutDashboard },
+                                { label: "Manager", href: "/manager/dashboard", icon: User },
+                                { label: "Technician", href: "/technician/dashboard", icon: Menu },
                             ].map((dash) => (
                                 <Link
                                     key={dash.label}
@@ -305,7 +262,7 @@ export const DashboardLayout = ({
                 {/* Utilities: Theme & Notifications */}
                 <div className={`flex items-center ${open ? 'justify-between px-2' : 'flex-col gap-2'}`}>
                     <ThemeToggle />
-                    <NotificationButton />
+                    <NotificationBell />
                 </div>
 
                 {/* User Profile */}
@@ -419,7 +376,7 @@ export const DashboardLayout = ({
 
                     <div className="flex items-center gap-2">
                         <ThemeToggle />
-                        <NotificationButton />
+                        <NotificationBell />
                         <Avatar className="h-8 w-8">
                             <AvatarImage src={user?.photoURL || ""} />
                             <AvatarFallback>{user?.displayName?.[0] || "U"}</AvatarFallback>

@@ -65,57 +65,63 @@ export default function TechnicianAvailableJobsPage() {
     }
 
     return (
-        <div className="grid gap-6">
-            {availableJobs.length === 0 ? (
-                <Card className="text-center py-12">
-                    <CardContent>
-                        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Calendar className="h-8 w-8 text-gray-400" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No New Jobs</h3>
-                        <p className="text-gray-500 mt-2 max-w-sm mx-auto">
-                            There are currently no new jobs available. Please check back later.
-                        </p>
-                    </CardContent>
-                </Card>
-            ) : (
-                availableJobs.map((job) => (
-                    <Card key={job.id}>
-                        <CardHeader>
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <CardTitle>{job.serviceName}</CardTitle>
-                                    <CardDescription className="mt-1 flex items-center">
-                                        <MapPin className="h-4 w-4 mr-1" /> {job.address}
-                                    </CardDescription>
-                                </div>
-                                <Badge variant="outline" className="text-lg font-bold">₹{job.amount}</Badge>
-                            </div>
-                        </CardHeader>
+        <div className="space-y-6">
+            <div>
+                <h2 className="text-3xl font-bold tracking-tight">Available Jobs</h2>
+                <p className="text-muted-foreground">Browse and accept new service requests.</p>
+            </div>
+            <div className="grid gap-6">
+                {availableJobs.length === 0 ? (
+                    <Card className="text-center py-12">
                         <CardContent>
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <span className="text-gray-500 block">Date</span>
-                                    <span className="font-medium">{new Date(job.date).toLocaleDateString()}</span>
-                                </div>
-                                <div>
-                                    <span className="text-gray-500 block">Payment</span>
-                                    <span className="font-medium capitalize">{job.paymentMethod} ({job.paymentStatus})</span>
-                                </div>
+                            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Calendar className="h-8 w-8 text-gray-400" />
                             </div>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No New Jobs</h3>
+                            <p className="text-gray-500 mt-2 max-w-sm mx-auto">
+                                There are currently no new jobs available. Please check back later.
+                            </p>
                         </CardContent>
-                        <CardFooter>
-                            <Button
-                                className="w-full bg-blue-600 hover:bg-blue-700"
-                                onClick={() => handleAcceptJob(job.id)}
-                                disabled={acceptingJobId === job.id}
-                            >
-                                {acceptingJobId === job.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Accept Job"}
-                            </Button>
-                        </CardFooter>
                     </Card>
-                ))
-            )}
+                ) : (
+                    availableJobs.map((job) => (
+                        <Card key={job.id}>
+                            <CardHeader>
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <CardTitle>{job.serviceName}</CardTitle>
+                                        <CardDescription className="mt-1 flex items-center">
+                                            <MapPin className="h-4 w-4 mr-1" /> {job.address}
+                                        </CardDescription>
+                                    </div>
+                                    <Badge variant="outline" className="text-lg font-bold">₹{job.amount}</Badge>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span className="text-gray-500 block">Date</span>
+                                        <span className="font-medium">{new Date(job.date).toLocaleDateString()}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500 block">Payment</span>
+                                        <span className="font-medium capitalize">{job.paymentMethod} ({job.paymentStatus})</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                            <CardFooter>
+                                <Button
+                                    className="w-full bg-blue-600 hover:bg-blue-700"
+                                    onClick={() => handleAcceptJob(job.id)}
+                                    disabled={acceptingJobId === job.id}
+                                >
+                                    {acceptingJobId === job.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Accept Job"}
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    ))
+                )}
+            </div>
         </div>
     );
 }

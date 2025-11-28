@@ -164,19 +164,19 @@ export function Header() {
                                         <DropdownMenuLabel>Select Dashboard</DropdownMenuLabel>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem asChild>
-                                            <Link href="/admin">Admin Dashboard</Link>
+                                            <Link href="/admin/dashboard">Admin Dashboard</Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem asChild>
-                                            <Link href="/manager">Manager Dashboard</Link>
+                                            <Link href="/manager/dashboard">Manager Dashboard</Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem asChild>
-                                            <Link href="/technician">Technician Dashboard</Link>
+                                            <Link href="/technician/dashboard">Technician Dashboard</Link>
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             ) : (role === 'manager' || role === 'technician') && (
                                 <Button variant="ghost" asChild>
-                                    <Link href={role === 'manager' ? "/manager" : "/technician"}>
+                                    <Link href={role === 'manager' ? "/manager/dashboard" : "/technician/dashboard"}>
                                         <LayoutDashboard className="mr-2 h-4 w-4" />
                                         {role === 'manager' ? "Manager" : "Technician"} Dashboard
                                     </Link>
@@ -250,18 +250,18 @@ export function Header() {
                                 <>
                                     <div className="px-2 py-1.5 text-sm font-semibold">Dashboards</div>
                                     <Button variant="outline" className="w-full justify-start pl-8" asChild>
-                                        <Link href="/admin">Admin Dashboard</Link>
+                                        <Link href="/admin/dashboard">Admin Dashboard</Link>
                                     </Button>
                                     <Button variant="outline" className="w-full justify-start pl-8" asChild>
-                                        <Link href="/manager">Manager Dashboard</Link>
+                                        <Link href="/manager/dashboard">Manager Dashboard</Link>
                                     </Button>
                                     <Button variant="outline" className="w-full justify-start pl-8" asChild>
-                                        <Link href="/technician">Technician Dashboard</Link>
+                                        <Link href="/technician/dashboard">Technician Dashboard</Link>
                                     </Button>
                                 </>
                             ) : (role === 'manager' || role === 'technician') && (
                                 <Button variant="outline" className="w-full justify-start" asChild>
-                                    <Link href={role === 'manager' ? "/manager" : "/technician"}>
+                                    <Link href={role === 'manager' ? "/manager/dashboard" : "/technician/dashboard"}>
                                         <LayoutDashboard className="mr-2 h-4 w-4" />
                                         {role === 'manager' ? "Manager" : "Technician"} Dashboard
                                     </Link>

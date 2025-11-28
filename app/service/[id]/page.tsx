@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { getServiceById, Service } from "@/lib/db/services";
+import { useAuth } from "@/context/AuthContext";
 import {
   Star,
   Clock,
@@ -20,14 +22,20 @@ import {
   ArrowRight,
   Calendar,
   Loader2,
-  Sparkles
+  Sparkles,
+  LogIn,
+  UserPlus
 } from "lucide-react";
 
 export default function ServiceDetailsPage() {
   const params = useParams();
+  const router = useRouter();
+  const { user } = useAuth();
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState("standard");
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingBookingUrl, setPendingBookingUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchService = async () => {
@@ -45,6 +53,17 @@ export default function ServiceDetailsPage() {
 
     fetchService();
   }, [params.id]);
+
+  const handleBook = (packageId: string) => {
+    const bookingUrl = `/booking?serviceId=${service?.id}&package=${packageId}`;
+
+    if (user) {
+      router.push(bookingUrl);
+    } else {
+      setPendingBookingUrl(bookingUrl);
+      setShowAuthModal(true);
+    }
+  };
 
   if (loading) {
     return (
@@ -186,10 +205,11 @@ export default function ServiceDetailsPage() {
                           ))}
                         </div>
 
-                        <Button className="w-full h-14 text-lg bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 shadow-xl hover:shadow-2xl transition-all rounded-full mt-4 group" asChild>
-                          <Link href={`/booking?serviceId=${service.id}&package=${key}`}>
-                            Book Slot <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                          </Link>
+                        <Button
+                          className="w-full h-14 text-lg bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 shadow-xl hover:shadow-2xl transition-all rounded-full mt-4 group"
+                          onClick={() => handleBook(key)}
+                        >
+                          Book Slot <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         </Button>
 
                         <p className="text-xs text-center text-gray-400 font-medium">
@@ -214,6 +234,38 @@ export default function ServiceDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl font-bold">Sign In Required</DialogTitle>
+            <DialogDescription className="text-center pt-2">
+              You need to be signed in to book a service. Please sign in or create an account to continue.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <Button className="w-full h-12 text-lg" asChild>
+              <Link href={`/auth/login?redirect=${encodeURIComponent(pendingBookingUrl || "")}`}>
+                <LogIn className="mr-2 h-5 w-5" /> Sign In
+              </Link>
+            </Button>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or</span>
+              </div>
+            </div>
+            <Button variant="outline" className="w-full h-12 text-lg" asChild>
+              <Link href={`/auth/register?redirect=${encodeURIComponent(pendingBookingUrl || "")}`}>
+                <UserPlus className="mr-2 h-5 w-5" /> Create Account
+              </Link>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

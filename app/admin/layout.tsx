@@ -58,7 +58,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     const sidebarItems = [
-        { icon: LayoutDashboard, label: "Overview", id: "overview", href: "/admin/overview" },
+        { icon: LayoutDashboard, label: "Overview", id: "overview", href: "/admin/dashboard" },
         { icon: Calendar, label: "Bookings", id: "bookings", href: "/admin/bookings" },
         { icon: Package, label: "Services", id: "services", href: "/admin/services" },
         { icon: Briefcase, label: "Technicians", id: "technicians", href: "/admin/technicians", notifs: pendingTechs },

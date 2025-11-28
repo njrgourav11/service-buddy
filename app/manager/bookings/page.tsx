@@ -85,65 +85,72 @@ export default function ManagerBookingsPage() {
 
     return (
         <>
-            <Card>
-                <CardHeader>
-                    <CardTitle>All Bookings</CardTitle>
-                    <CardDescription>Manage and assign bookings</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4 overflow-x-auto">
-                        {bookings.length === 0 ? (
-                            <p className="text-gray-500 text-center py-8">No bookings found.</p>
-                        ) : (
-                            <div className="rounded-md border min-w-[600px]">
-                                <div className="grid grid-cols-6 gap-4 p-4 bg-gray-50 dark:bg-gray-900 font-medium text-sm">
-                                    <div className="col-span-2">Service Details</div>
-                                    <div>Customer</div>
-                                    <div>Date & Time</div>
-                                    <div>Status</div>
-                                    <div className="text-right">Action</div>
-                                </div>
-                                {bookings.map((booking) => (
-                                    <div key={booking.id} className="grid grid-cols-6 gap-4 p-4 border-t items-center text-sm">
-                                        <div className="col-span-2">
-                                            <p className="font-semibold">{booking.serviceName}</p>
-                                            <p className="text-xs text-gray-500">{booking.address}</p>
-                                        </div>
-                                        <div>
-                                            <p className="font-medium">{booking.userName}</p>
-                                        </div>
-                                        <div>
-                                            <p>{new Date(booking.date).toLocaleDateString()}</p>
-                                            <p className="text-xs text-gray-500">{booking.time}</p>
-                                        </div>
-                                        <div>
-                                            <Badge variant={
-                                                booking.status === "confirmed" ? "default" :
-                                                    booking.status === "assigned" ? "secondary" :
-                                                        booking.status === "completed" ? "outline" : "destructive"
-                                            }>
-                                                {booking.status}
-                                            </Badge>
-                                            {booking.technicianName && (
-                                                <p className="text-xs text-gray-500 mt-1">Tech: {booking.technicianName}</p>
-                                            )}
-                                        </div>
-                                        <div className="text-right">
-                                            {booking.status === "confirmed" || booking.status === "pending_verification" ? (
-                                                <Button size="sm" onClick={() => setSelectedBooking(booking)}>Assign</Button>
-                                            ) : (
-                                                <Button size="sm" variant="outline" disabled>
-                                                    {booking.status === "assigned" ? "Reassign" : "View"}
-                                                </Button>
-                                            )}
-                                        </div>
+            <div className="space-y-6">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight">All Bookings</h2>
+                    <p className="text-muted-foreground">Manage and assign bookings</p>
+                </div>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Bookings List</CardTitle>
+                        <CardDescription>View and manage all service bookings</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4 overflow-x-auto">
+                            {bookings.length === 0 ? (
+                                <p className="text-gray-500 text-center py-8">No bookings found.</p>
+                            ) : (
+                                <div className="rounded-md border min-w-[600px]">
+                                    <div className="grid grid-cols-6 gap-4 p-4 bg-gray-50 dark:bg-gray-900 font-medium text-sm">
+                                        <div className="col-span-2">Service Details</div>
+                                        <div>Customer</div>
+                                        <div>Date & Time</div>
+                                        <div>Status</div>
+                                        <div className="text-right">Action</div>
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
+                                    {bookings.map((booking) => (
+                                        <div key={booking.id} className="grid grid-cols-6 gap-4 p-4 border-t items-center text-sm">
+                                            <div className="col-span-2">
+                                                <p className="font-semibold">{booking.serviceName}</p>
+                                                <p className="text-xs text-gray-500">{booking.address}</p>
+                                            </div>
+                                            <div>
+                                                <p className="font-medium">{booking.userName}</p>
+                                            </div>
+                                            <div>
+                                                <p>{new Date(booking.date).toLocaleDateString()}</p>
+                                                <p className="text-xs text-gray-500">{booking.time}</p>
+                                            </div>
+                                            <div>
+                                                <Badge variant={
+                                                    booking.status === "confirmed" ? "default" :
+                                                        booking.status === "assigned" ? "secondary" :
+                                                            booking.status === "completed" ? "outline" : "destructive"
+                                                }>
+                                                    {booking.status}
+                                                </Badge>
+                                                {booking.technicianName && (
+                                                    <p className="text-xs text-gray-500 mt-1">Tech: {booking.technicianName}</p>
+                                                )}
+                                            </div>
+                                            <div className="text-right">
+                                                {booking.status === "confirmed" || booking.status === "pending_verification" ? (
+                                                    <Button size="sm" onClick={() => setSelectedBooking(booking)}>Assign</Button>
+                                                ) : (
+                                                    <Button size="sm" variant="outline" disabled>
+                                                        {booking.status === "assigned" ? "Reassign" : "View"}
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* Assign Technician Modal */}
             <Dialog open={!!selectedBooking} onOpenChange={(open) => !open && setSelectedBooking(null)}>

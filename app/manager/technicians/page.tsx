@@ -52,49 +52,56 @@ export default function ManagerTechniciansPage() {
 
     return (
         <>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Technicians</CardTitle>
-                    <CardDescription>View available technicians</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {technicians.length === 0 ? (
-                            <p className="text-gray-500 text-center py-4">No technicians found.</p>
-                        ) : (
-                            technicians.map((tech) => (
-                                <div key={tech.id} className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors gap-4">
-                                    <div className="flex items-center space-x-4">
-                                        <Avatar>
-                                            <AvatarFallback>{tech.fullName?.[0] || "T"}</AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="font-semibold">{tech.fullName}</p>
-                                            <p className="text-sm text-gray-500 capitalize">{tech.category} • {tech.experience} years exp</p>
-                                            <p className="text-xs text-gray-400">{tech.city}, {tech.state}</p>
+            <div className="space-y-6">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight">Technicians</h2>
+                    <p className="text-muted-foreground">View available technicians</p>
+                </div>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Technicians List</CardTitle>
+                        <CardDescription>View and manage technician availability</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            {technicians.length === 0 ? (
+                                <p className="text-gray-500 text-center py-4">No technicians found.</p>
+                            ) : (
+                                technicians.map((tech) => (
+                                    <div key={tech.id} className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors gap-4">
+                                        <div className="flex items-center space-x-4">
+                                            <Avatar>
+                                                <AvatarFallback>{tech.fullName?.[0] || "T"}</AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <p className="font-semibold">{tech.fullName}</p>
+                                                <p className="text-sm text-gray-500 capitalize">{tech.category} • {tech.experience} years exp</p>
+                                                <p className="text-xs text-gray-400">{tech.city}, {tech.state}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center space-x-3 w-full md:w-auto justify-end">
+                                            <Badge variant={
+                                                tech.status === "approved" ? "default" :
+                                                    tech.status === "rejected" ? "destructive" : "secondary"
+                                            }>
+                                                {tech.status}
+                                            </Badge>
+                                            <Button variant="outline" size="sm" onClick={() => setSelectedTech(tech)}>
+                                                View Details
+                                            </Button>
                                         </div>
                                     </div>
-                                    <div className="flex items-center space-x-3 w-full md:w-auto justify-end">
-                                        <Badge variant={
-                                            tech.status === "approved" ? "default" :
-                                                tech.status === "rejected" ? "destructive" : "secondary"
-                                        }>
-                                            {tech.status}
-                                        </Badge>
-                                        <Button variant="outline" size="sm" onClick={() => setSelectedTech(tech)}>
-                                            View Details
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
+                                ))
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* Technician Details Modal */}
             <Dialog open={!!selectedTech} onOpenChange={(open) => !open && setSelectedTech(null)}>
-                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-[600px]">
                     <DialogHeader>
                         <DialogTitle>Technician Details</DialogTitle>
                         <DialogDescription>Details for {selectedTech?.fullName}</DialogDescription>

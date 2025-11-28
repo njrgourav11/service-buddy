@@ -8,7 +8,7 @@ export default function ManagerPage() {
     const router = useRouter();
 
     useEffect(() => {
-        router.push("/manager/overview");
+        router.push("/manager/dashboard");
     }, [router]);
 
     return (

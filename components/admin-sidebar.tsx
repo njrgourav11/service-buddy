@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { LayoutDashboard, Users, Calendar, Settings, FileText, Shield, Wrench, TrendingUp, Activity } from "lucide-react"
 
 const sidebarItems = [
-    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Technicians", href: "/admin/technicians", icon: Wrench },
     { name: "Bookings", href: "/admin/bookings", icon: Calendar },
