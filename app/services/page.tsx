@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { getServices, Service } from "@/lib/db/services";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
+import { ServiceCard } from "@/components/service-card";
 import {
   Search,
   Filter,
@@ -163,70 +164,17 @@ function ServicesContent() {
             </div>
 
             {/* Services Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredServices.map((service) => (
-                <motion.div
-                  key={service.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Link href={`/service/${service.id}`}>
-                    <Card className="h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-none bg-white dark:bg-gray-900 group cursor-pointer rounded-3xl overflow-hidden shadow-sm ring-1 ring-gray-100 dark:ring-gray-800 relative">
-                      <GlowingEffect
-                        spread={45}
-                        glow={true}
-                        disabled={false}
-                        proximity={90}
-                        inactiveZone={0.01}
-                        borderWidth={2}
-                      />
-                      <CardContent className="p-0">
-                        <div className="h-52 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center text-7xl relative overflow-hidden group-hover:from-blue-100 dark:group-hover:from-gray-800 transition-colors">
-                          <div className="absolute top-4 right-4 bg-white/90 dark:bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-semibold flex items-center shadow-sm">
-                            <Star className="h-3 w-3 text-yellow-500 fill-current mr-1" />
-                            {service.rating}
-                          </div>
-                          <span className="transform group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">
-                            <ServiceIcon
-                              serviceId={service.id}
-                              className="h-24 w-24 text-blue-600 dark:text-blue-400"
-                              fallbackImage={service.image}
-                            />
-                          </span>
-                        </div>
-                        <div className="p-6">
-                          <div className="mb-3">
-                            <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 border-none rounded-full px-3 font-normal">
-                              {service.category}
-                            </Badge>
-                          </div>
-                          <h3 className="font-bold text-xl mb-2 text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors line-clamp-1">{service.title}</h3>
-                          <div className="flex items-center text-sm text-gray-500 mb-6">
-                            <Clock className="h-4 w-4 mr-1.5 text-gray-400" />
-                            <span>45-60 mins</span>
-                            <span className="mx-2">•</span>
-                            <span>{service.reviews} reviews</span>
-                          </div>
-                          <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
-                            <div>
-                              <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Starts at</p>
-                              <span className="font-bold text-xl text-gray-900 dark:text-white">₹{service.price}</span>
-                            </div>
-                            <Button size="sm" className="rounded-full px-5 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 shadow-lg hover:shadow-xl transition-all group-hover:scale-105">
-                              Book
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </motion.div>
-              ))}
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                All Services
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                {filteredServices.length} service{filteredServices.length !== 1 ? 's' : ''} available
+              </p>
             </div>
 
-            {filteredServices.length === 0 && (
-              <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-3xl border border-dashed border-gray-200 dark:border-gray-800">
+            {filteredServices.length === 0 ? (
+              <div className="text-center py-16 bg-white dark:bg-gray-900 rounded-3xl border border-dashed border-gray-200 dark:border-gray-800">
                 <div className="bg-gray-50 dark:bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Search className="h-8 w-8 text-gray-400" />
                 </div>
@@ -235,6 +183,37 @@ function ServicesContent() {
                 <Button variant="outline" onClick={() => { setSearchQuery(""); setSelectedCategories([]); setPriceRange([0, 5000]) }} className="rounded-full">
                   Clear all filters
                 </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredServices.map((service, index) => (
+                  <motion.div
+                    key={service.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <ServiceCard
+                      id={service.id}
+                      title={service.title}
+                      description={service.description}
+                      price={`₹${service.price}`}
+                      image={`https://images.unsplash.com/photo-${service.category === 'Cleaning' ? '1581578731548-c64695cc6952' :
+                          service.category === 'Plumbing' ? '1607472586893-edb57bdc0e39' :
+                            service.category === 'Electrical' ? '1621905251918-48416bd8575a' :
+                              service.category === 'Appliance' ? '1556911220-e15b29be8c8f' :
+                                service.category === 'Beauty' ? '1560066984-3ad0cf870f3e' :
+                                  service.category === 'Gardening' ? '1416879595882-3373a0480b5b' :
+                                    '1581578731548-c64695cc6952'
+                        }?w=400&h=300&fit=crop`}
+                      category={service.category}
+                      rating={service.rating.toFixed(1)}
+                      onAddToCart={() => {
+                        window.location.href = `/service/${service.id}`;
+                      }}
+                    />
+                  </motion.div>
+                ))}
               </div>
             )}
           </div>
