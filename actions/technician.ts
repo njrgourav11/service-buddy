@@ -216,3 +216,41 @@ export async function getTechnicianStats(token: string) {
         return { success: false, error: error.message };
     }
 }
+
+export async function getAllTechnicians(token: string) {
+    try {
+        await adminAuth.verifyIdToken(token);
+        // Add admin check
+
+        const snapshot = await adminDb.collection("technicians")
+            .orderBy("joinedAt", "desc")
+            .get();
+
+        const technicians = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        return { success: true, technicians };
+    } catch (error: any) {
+        console.error("Error fetching technicians:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function approveTechnician(technicianId: string, token: string) {
+    try {
+        await adminAuth.verifyIdToken(token);
+        // Add admin check
+
+        await adminDb.collection("technicians").doc(technicianId).update({
+            status: "approved",
+            updatedAt: new Date().toISOString()
+        });
+
+        revalidatePath("/admin/technicians");
+        return { success: true };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+}

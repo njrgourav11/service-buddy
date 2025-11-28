@@ -32,3 +32,39 @@ export async function getServicesForAdmin(token: string) {
         return { success: false, error: error.message };
     }
 }
+
+export async function createService(data: any, token: string) {
+    try {
+        await verifyAdmin(token);
+        const validation = serviceSchema.safeParse(data);
+        if (!validation.success) return { success: false, error: validation.error.message };
+
+        const docRef = await adminDb.collection("services").add({
+            ...validation.data,
+            createdAt: new Date().toISOString()
+        });
+
+        revalidatePath("/admin");
+        return { success: true, id: docRef.id };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+}
+
+export async function updateService(id: string, data: any, token: string) {
+    try {
+        await verifyAdmin(token);
+        const validation = serviceSchema.safeParse(data);
+        if (!validation.success) return { success: false, error: validation.error.message };
+
+        await adminDb.collection("services").doc(id).update({
+            ...validation.data,
+            updatedAt: new Date().toISOString()
+        });
+
+        revalidatePath("/admin");
+        return { success: true };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+}

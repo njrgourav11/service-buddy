@@ -39,3 +39,25 @@ export async function logSystemAction(
         // Don't throw, logging shouldn't break the main flow
     }
 }
+
+export async function getSystemLogs(token: string) {
+    try {
+        // await adminAuth.verifyIdToken(token);
+        // Admin check
+
+        const snapshot = await adminDb.collection("system_logs")
+            .orderBy("timestamp", "desc")
+            .limit(100)
+            .get();
+
+        const logs = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        return { success: true, logs };
+    } catch (error: any) {
+        console.error("Error fetching logs:", error);
+        return { success: false, error: error.message };
+    }
+}

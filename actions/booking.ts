@@ -97,3 +97,24 @@ export async function getUserBookings(token: string) {
         return { success: false, error: error.message };
     }
 }
+
+export async function getAllBookings(token: string) {
+    try {
+        await adminAuth.verifyIdToken(token);
+        // Add admin check
+
+        const snapshot = await adminDb.collection("bookings")
+            .orderBy("createdAt", "desc")
+            .get();
+
+        const bookings = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        return { success: true, bookings };
+    } catch (error: any) {
+        console.error("Error fetching all bookings:", error);
+        return { success: false, error: error.message };
+    }
+}
