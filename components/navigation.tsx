@@ -118,8 +118,8 @@ export function Navigation() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || !isHomePage
-          ? "bg-white dark:bg-gray-950 shadow-sm border-b border-gray-200 dark:border-gray-800"
-          : "bg-transparent"
+        ? "bg-white dark:bg-gray-950 shadow-sm border-b border-gray-200 dark:border-gray-800"
+        : "bg-transparent"
         }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -136,7 +136,7 @@ export function Navigation() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center space-x-1">
             {/* Location Picker */}
             <Dialog open={locationOpen} onOpenChange={setLocationOpen}>
               <DialogTrigger asChild>
@@ -269,7 +269,7 @@ export function Navigation() {
           </div>
 
           {/* Mobile Menu */}
-          <div className="md:hidden flex items-center space-x-2">
+          <div className="lg:hidden flex items-center space-x-2">
             <NotificationBell />
             <ThemeToggle />
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -282,6 +282,10 @@ export function Navigation() {
                 <div className="flex flex-col h-full bg-white dark:bg-gray-900">
                   <div className="p-5 border-b flex items-center justify-between">
                     <SheetTitle className="text-xl font-bold">Menu</SheetTitle>
+                    <div className="flex items-center space-x-2">
+                      <ThemeToggle />
+                      {user && <NotificationBell />}
+                    </div>
                   </div>
 
                   <div className="flex-1 overflow-y-auto p-5 space-y-6">
@@ -353,6 +357,7 @@ export function Navigation() {
                               setMobileMenuOpen(false)
                             }}
                             className="flex items-center space-x-3 p-2 font-medium w-full text-left text-red-600"
+                            type="button"
                           >
                             <LogOut className="h-5 w-5" />
                             <span>Logout</span>
