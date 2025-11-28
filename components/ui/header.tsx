@@ -7,6 +7,7 @@ import { MenuToggleIcon } from '@/components/ui/menu-toggle-icon';
 import { ToggleTheme } from '@/components/ui/toggle-theme';
 import { NotificationBell } from "@/components/notification-bell";
 import { createPortal } from 'react-dom';
+import { useAuth } from "@/context/AuthContext";
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -32,6 +33,8 @@ import {
     HelpCircle,
     Phone,
     Mail,
+    LogOut,
+    User,
 } from 'lucide-react';
 
 type LinkItem = {
@@ -44,6 +47,7 @@ type LinkItem = {
 export function Header() {
     const [open, setOpen] = React.useState(false);
     const scrolled = useScroll(10);
+    const { user, logout } = useAuth();
 
     React.useEffect(() => {
         if (open) {
@@ -130,12 +134,29 @@ export function Header() {
                 <div className="hidden items-center gap-2 md:flex">
                     <NotificationBell />
                     <ToggleTheme />
-                    <Button variant="outline" asChild>
-                        <Link href="/auth/login">Sign In</Link>
-                    </Button>
-                    <Button asChild>
-                        <Link href="/auth/register">Get Started</Link>
-                    </Button>
+                    {user ? (
+                        <>
+                            <Button variant="ghost" asChild>
+                                <Link href="/profile">
+                                    <User className="mr-2 h-4 w-4" />
+                                    Profile
+                                </Link>
+                            </Button>
+                            <Button variant="outline" onClick={() => logout()}>
+                                <LogOut className="mr-2 h-4 w-4" />
+                                Logout
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <Button variant="outline" asChild>
+                                <Link href="/auth/login">Sign In</Link>
+                            </Button>
+                            <Button asChild>
+                                <Link href="/auth/register">Get Started</Link>
+                            </Button>
+                        </>
+                    )}
                 </div>
                 <Button
                     size="icon"
@@ -165,13 +186,41 @@ export function Header() {
                         ))}
                     </div>
                 </NavigationMenu>
-                <div className="flex flex-col gap-2">
-                    <Button variant="outline" className="w-full bg-transparent" asChild>
-                        <Link href="/auth/login">Sign In</Link>
-                    </Button>
-                    <Button className="w-full" asChild>
-                        <Link href="/auth/register">Get Started</Link>
-                    </Button>
+                <div className="flex flex-col gap-2 border-t pt-4 mt-2">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Theme</span>
+                        <ToggleTheme />
+                    </div>
+                    {user && (
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">Notifications</span>
+                            <NotificationBell />
+                        </div>
+                    )}
+
+                    {user ? (
+                        <>
+                            <Button variant="outline" className="w-full justify-start" asChild>
+                                <Link href="/profile">
+                                    <User className="mr-2 h-4 w-4" />
+                                    Profile
+                                </Link>
+                            </Button>
+                            <Button variant="destructive" className="w-full justify-start" onClick={() => logout()}>
+                                <LogOut className="mr-2 h-4 w-4" />
+                                Logout
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <Button variant="outline" className="w-full bg-transparent" asChild>
+                                <Link href="/auth/login">Sign In</Link>
+                            </Button>
+                            <Button className="w-full" asChild>
+                                <Link href="/auth/register">Get Started</Link>
+                            </Button>
+                        </>
+                    )}
                 </div>
             </MobileMenu>
         </header>

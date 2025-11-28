@@ -146,8 +146,17 @@ export async function approveTechnician(technicianId: string, status: "approved"
 export async function verifyAdmin(token: string) {
     const decodedToken = await adminAuth.verifyIdToken(token);
 
+    console.log("Verifying Admin Token:", {
+        uid: decodedToken.uid,
+        email: decodedToken.email,
+        role: decodedToken.role,
+        admin: decodedToken.admin,
+        claims: decodedToken
+    });
+
     // Check for custom claim 'role' or 'admin' property
     if (decodedToken.role !== 'admin' && decodedToken.admin !== true) {
+        console.error("Admin verification failed for user:", decodedToken.email);
         throw new Error("Unauthorized: Admin access required");
     }
     return decodedToken;

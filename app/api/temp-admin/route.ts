@@ -10,6 +10,8 @@ export async function GET(request: Request) {
             role: "admin"
         }, { merge: true });
 
+        await adminAuth.setCustomUserClaims(user.uid, { role: "admin" });
+
         return NextResponse.json({ success: true, message: `User ${email} is now an admin.` });
     } catch (error: any) {
         console.error("Error setting admin role:", error);
