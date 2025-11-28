@@ -9,7 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Clock, CheckCircle2, AlertCircle, Calendar, MapPin, Loader2, DollarSign } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { acceptJob, getTechnicianStatus, getAvailableJobs, getMyJobs } from "@/actions/technician";
+import { acceptJob, getTechnicianStatus, getAvailableJobs, getMyJobs, getTechnicianStats } from "@/actions/technician";
 
 export default function TechnicianDashboard() {
     const { user, loading: authLoading } = useAuth();
@@ -17,6 +17,7 @@ export default function TechnicianDashboard() {
     const [loading, setLoading] = useState(true);
     const [availableJobs, setAvailableJobs] = useState<any[]>([]);
     const [myJobs, setMyJobs] = useState<any[]>([]);
+    const [stats, setStats] = useState<any>(null);
     const [acceptingJobId, setAcceptingJobId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -57,6 +58,11 @@ export default function TechnicianDashboard() {
                     const myJobsRes = await getMyJobs(token);
                     if (myJobsRes.success) {
                         setMyJobs(myJobsRes.jobs || []);
+                    }
+
+                    const statsRes = await getTechnicianStats(token);
+                    if (statsRes.success) {
+                        setStats(statsRes.stats);
                     }
 
                 } catch (error) {
@@ -174,31 +180,60 @@ export default function TechnicianDashboard() {
                                 <Card>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                         <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
-                                        <span className="text-2xl font-bold">₹0</span>
+                                        <span className="text-2xl font-bold">₹{stats?.totalEarnings || 0}</span>
                                     </CardHeader>
                                     <CardContent>
-                                        <p className="text-xs text-muted-foreground">+0% from last month</p>
+                                        <p className="text-xs text-muted-foreground">Lifetime earnings</p>
                                     </CardContent>
                                 </Card>
                                 <Card>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                         <CardTitle className="text-sm font-medium">Completed Jobs</CardTitle>
-                                        <span className="text-2xl font-bold">0</span>
+                                        <span className="text-2xl font-bold">{stats?.completedJobs || 0}</span>
                                     </CardHeader>
                                     <CardContent>
-                                        <p className="text-xs text-muted-foreground">+0% from last month</p>
+                                        <p className="text-xs text-muted-foreground">Successfully delivered</p>
                                     </CardContent>
                                 </Card>
                                 <Card>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                         <CardTitle className="text-sm font-medium">Rating</CardTitle>
-                                        <span className="text-2xl font-bold">-</span>
+                                        <span className="text-2xl font-bold">{stats?.rating?.toFixed(1) || "-"}</span>
                                     </CardHeader>
                                     <CardContent>
-                                        <p className="text-xs text-muted-foreground">No ratings yet</p>
+                                        <div className="flex items-center">
+                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                <DollarSign key={star} className={`h-3 w-3 ${star <= (stats?.rating || 0) ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`} />
+                                            ))}
+                                        </div>
                                     </CardContent>
                                 </Card>
                             </div>
+
+                            {/* Earnings Chart */}
+                            {stats?.monthlyEarnings && (
+                                <Card className="mb-8">
+                                    <CardHeader>
+                                        <CardTitle>Earnings Overview</CardTitle>
+                                        <CardDescription>Monthly earnings for the last 6 months</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="h-[200px] flex items-end justify-between gap-2">
+                                            {stats.monthlyEarnings.map((item: any, index: number) => (
+                                                <div key={index} className="flex flex-col items-center gap-2 flex-1">
+                                                    <div
+                                                        className="w-full bg-blue-600 rounded-t-md transition-all hover:bg-blue-700"
+                                                        style={{
+                                                            height: `${Math.max((item.amount / (Math.max(...stats.monthlyEarnings.map((m: any) => m.amount)) || 1)) * 100, 5)}%`
+                                                        }}
+                                                    />
+                                                    <span className="text-xs text-gray-500">{item.name}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
                         </TabsContent>
 
                         <TabsContent value="available">

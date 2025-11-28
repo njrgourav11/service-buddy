@@ -152,3 +152,67 @@ export async function getMyJobs(token: string) {
         return { success: false, error: error.message };
     }
 }
+
+export async function getTechnicianStats(token: string) {
+    try {
+        const decodedToken = await adminAuth.verifyIdToken(token);
+        const uid = decodedToken.uid;
+
+        const techDoc = await adminDb.collection("technicians").doc(uid).get();
+        if (!techDoc.exists) {
+            return { success: false, error: "Technician not found" };
+        }
+        const techData = techDoc.data();
+
+        // Calculate earnings from completed jobs
+        const jobsSnap = await adminDb.collection("bookings")
+            .where("technicianId", "==", uid)
+            .where("status", "==", "completed")
+            .get();
+
+        let totalEarnings = 0;
+        jobsSnap.docs.forEach(doc => {
+            const data = doc.data();
+            if (data.amount) {
+                totalEarnings += data.amount;
+            }
+        });
+
+        // Get monthly earnings for chart (last 6 months)
+        const monthlyEarnings = new Array(6).fill(0).map((_, i) => {
+            const d = new Date();
+            d.setMonth(d.getMonth() - i);
+            return {
+                name: d.toLocaleString('default', { month: 'short' }),
+                amount: 0,
+                month: d.getMonth(),
+                year: d.getFullYear()
+            };
+        }).reverse();
+
+        jobsSnap.docs.forEach(doc => {
+            const data = doc.data();
+            const date = new Date(data.date); // Booking date
+            const month = date.getMonth();
+            const year = date.getFullYear();
+
+            const monthStat = monthlyEarnings.find(m => m.month === month && m.year === year);
+            if (monthStat) {
+                monthStat.amount += data.amount || 0;
+            }
+        });
+
+        return {
+            success: true,
+            stats: {
+                totalEarnings,
+                completedJobs: techData?.completedJobs || 0,
+                rating: techData?.rating || 0,
+                monthlyEarnings
+            }
+        };
+    } catch (error: any) {
+        console.error("Error fetching stats:", error);
+        return { success: false, error: error.message };
+    }
+}

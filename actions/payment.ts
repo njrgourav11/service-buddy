@@ -43,6 +43,47 @@ export async function createPaymentOrder(bookingId: string, token: string) {
     }
 }
 
+import { generateInvoiceHTML } from "@/lib/invoice";
+
+export async function generateInvoice(bookingId: string) {
+    try {
+        const bookingSnap = await adminDb.collection("bookings").doc(bookingId).get();
+        if (!bookingSnap.exists) {
+            return { success: false, error: "Booking not found" };
+        }
+        const booking = { id: bookingSnap.id, ...bookingSnap.data() } as any;
+
+        const invoiceHtml = generateInvoiceHTML(booking);
+
+        const invoiceRef = await adminDb.collection("invoices").add({
+            bookingId,
+            userId: booking.userId,
+            html: invoiceHtml,
+            createdAt: new Date().toISOString()
+        });
+
+        await adminDb.collection("bookings").doc(bookingId).update({
+            invoiceId: invoiceRef.id,
+            invoiceGeneratedAt: new Date().toISOString()
+        });
+
+        return { success: true, invoiceId: invoiceRef.id };
+    } catch (error: any) {
+        console.error("Error generating invoice:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function getInvoice(invoiceId: string) {
+    try {
+        const docSnap = await adminDb.collection("invoices").doc(invoiceId).get();
+        if (!docSnap.exists) return { success: false, error: "Invoice not found" };
+        return { success: true, invoice: docSnap.data() };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+}
+
 export async function verifyPayment(
     bookingId: string,
     paymentData: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string },
@@ -73,7 +114,7 @@ export async function verifyPayment(
         });
 
         // Trigger Invoice Generation (Async)
-        // generateInvoice(bookingId); // We can call this here
+        await generateInvoice(bookingId);
 
         revalidatePath(`/payment?bookingId=${bookingId}`);
 
@@ -103,6 +144,9 @@ export async function updatePaymentStatusCash(bookingId: string, token: string) 
             paymentMethod: "cash",
             updatedAt: new Date().toISOString()
         });
+
+        // Generate invoice for cash payments too (provisional)
+        await generateInvoice(bookingId);
 
         revalidatePath(`/payment?bookingId=${bookingId}`);
         return { success: true };

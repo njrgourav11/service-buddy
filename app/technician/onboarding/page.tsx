@@ -101,7 +101,26 @@ export default function TechnicianOnboarding() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const validateStep = () => {
+        switch (step) {
+            case 1:
+                return formData.fullName && formData.phone && formData.email && (user || formData.password);
+            case 2:
+                return formData.address && formData.city && formData.zip;
+            case 3:
+                return formData.category && formData.experience && formData.bio;
+            case 4:
+                return true; // Documents are optional for now or mock
+            default:
+                return true;
+        }
+    };
+
     const handleNext = () => {
+        if (!validateStep()) {
+            alert("Please fill in all required fields.");
+            return;
+        }
         if (step < 5) setStep(step + 1);
     };
 

@@ -1,15 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
+import { useAuth } from "@/context/AuthContext"
+import { getUserBookings } from "@/actions/booking"
 import {
   Calendar,
   Clock,
@@ -21,91 +23,38 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  ChevronRight,
-  Filter
+  Loader2
 } from "lucide-react"
 
 interface Booking {
   id: string
-  service: string
-  icon: string
+  serviceName: string
   date: string
   time: string
-  status: "upcoming" | "completed" | "cancelled" | "in-progress"
-  amount: string
-  provider: string
+  status: "upcoming" | "completed" | "cancelled" | "in-progress" | "pending_payment" | "confirmed" | "assigned"
+  amount: number
+  technicianId?: string
   address: string
   rating?: number
   review?: string
+  [key: string]: any
 }
 
-const bookings: Booking[] = [
-  {
-    id: "BK001",
-    service: "Home Cleaning",
-    icon: "🧹",
-    date: "2024-01-20",
-    time: "2:00 PM",
-    status: "upcoming",
-    amount: "₹299",
-    provider: "Rajesh Kumar",
-    address: "123 Main St, Mumbai"
-  },
-  {
-    id: "BK002",
-    service: "Plumbing Repair",
-    icon: "🔧",
-    date: "2024-01-18",
-    time: "10:00 AM",
-    status: "completed",
-    amount: "₹199",
-    provider: "Amit Singh",
-    address: "456 Oak Ave, Mumbai",
-    rating: 5,
-    review: "Excellent service! Fixed the leak quickly and professionally."
-  },
-  {
-    id: "BK003",
-    service: "Electrical Installation",
-    icon: "⚡",
-    date: "2024-01-15",
-    time: "3:00 PM",
-    status: "completed",
-    amount: "₹449",
-    provider: "Vikram Patel",
-    address: "789 Pine St, Mumbai",
-    rating: 4,
-    review: "Good work, arrived on time. Minor delays but overall satisfied."
-  },
-  {
-    id: "BK004",
-    service: "Car Wash & Detailing",
-    icon: "🚗",
-    date: "2024-01-12",
-    time: "11:00 AM",
-    status: "cancelled",
-    amount: "₹299",
-    provider: "Suresh Reddy",
-    address: "321 Elm St, Mumbai"
-  },
-  {
-    id: "BK005",
-    service: "AC Repair",
-    icon: "❄️",
-    date: "2024-01-10",
-    time: "9:00 AM",
-    status: "in-progress",
-    amount: "₹599",
-    provider: "Karan Sharma",
-    address: "654 Maple Ave, Mumbai"
-  }
-]
-
-const statusConfig = {
+const statusConfig: any = {
   upcoming: {
     label: "Upcoming",
     color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
     icon: <Clock className="h-4 w-4" />
+  },
+  confirmed: {
+    label: "Confirmed",
+    color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+    icon: <CheckCircle className="h-4 w-4" />
+  },
+  assigned: {
+    label: "Technician Assigned",
+    color: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+    icon: <CheckCircle className="h-4 w-4" />
   },
   completed: {
     label: "Completed",
@@ -121,22 +70,53 @@ const statusConfig = {
     label: "In Progress",
     color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
     icon: <AlertCircle className="h-4 w-4" />
+  },
+  pending_payment: {
+    label: "Payment Pending",
+    color: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+    icon: <AlertCircle className="h-4 w-4" />
   }
 }
 
 export default function BookingsPage() {
+  const { user } = useAuth()
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState("all")
   const [sortBy, setSortBy] = useState("date")
 
+  useEffect(() => {
+    const fetchBookings = async () => {
+      if (user) {
+        try {
+          const token = await user.getIdToken()
+          const result = await getUserBookings(token)
+          if (result.success && result.bookings) {
+            setBookings(result.bookings as Booking[])
+          }
+        } catch (error) {
+          console.error("Failed to fetch bookings", error)
+        } finally {
+          setLoading(false)
+        }
+      } else {
+        setLoading(false)
+      }
+    }
+
+    fetchBookings()
+  }, [user])
+
   const filteredBookings = bookings.filter(booking => {
     if (filter === "all") return true
+    if (filter === "upcoming") return ["upcoming", "confirmed", "assigned", "pending_payment"].includes(booking.status)
     return booking.status === filter
   }).sort((a, b) => {
     switch (sortBy) {
       case "date":
         return new Date(b.date).getTime() - new Date(a.date).getTime()
       case "amount":
-        return parseInt(b.amount.replace("₹", "")) - parseInt(a.amount.replace("₹", ""))
+        return b.amount - a.amount
       case "status":
         return a.status.localeCompare(b.status)
       default:
@@ -144,13 +124,21 @@ export default function BookingsPage() {
     }
   })
 
-  const getStatusBadge = (status: Booking["status"]) => {
-    const config = statusConfig[status]
+  const getStatusBadge = (status: string) => {
+    const config = statusConfig[status] || statusConfig.upcoming
     return (
       <Badge variant="secondary" className={config.color}>
         {config.icon}
         <span className="ml-1">{config.label}</span>
       </Badge>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
     )
   }
 
@@ -174,7 +162,7 @@ export default function BookingsPage() {
           <Tabs value={filter} onValueChange={setFilter} className="w-full sm:w-auto">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              <TabsTrigger value="upcoming">Active</TabsTrigger>
               <TabsTrigger value="in-progress">In Progress</TabsTrigger>
               <TabsTrigger value="completed">Completed</TabsTrigger>
               <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
@@ -229,15 +217,15 @@ export default function BookingsPage() {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-4">
-                        <div className="text-4xl">{booking.icon}</div>
+                        <div className="text-4xl">🛠️</div>
                         <div className="flex-1">
                           <div className="flex items-start justify-between mb-2">
                             <div>
                               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                                {booking.service}
+                                {booking.serviceName}
                               </h3>
                               <p className="text-gray-600 dark:text-gray-400">
-                                Booking #{booking.id}
+                                Booking #{booking.id.substring(0, 8).toUpperCase()}
                               </p>
                             </div>
                             {getStatusBadge(booking.status)}
@@ -256,47 +244,26 @@ export default function BookingsPage() {
                             </div>
                             <div className="space-y-2">
                               <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                                <span className="font-medium mr-2">Provider:</span>
-                                {booking.provider}
+                                <span className="font-medium mr-2">Technician:</span>
+                                {booking.technicianId ? "Assigned" : "Pending Assignment"}
                               </div>
                               <div className="flex items-center text-sm font-semibold text-blue-600">
                                 <span className="mr-2">Amount:</span>
-                                {booking.amount}
+                                ₹{booking.amount}
                               </div>
                             </div>
                           </div>
 
-                          {/* Rating and Review for completed bookings */}
-                          {booking.status === "completed" && booking.rating && (
-                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4">
-                              <div className="flex items-center space-x-2 mb-2">
-                                <div className="flex items-center">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`h-4 w-4 ${
-                                        i < booking.rating!
-                                          ? "text-yellow-400 fill-current"
-                                          : "text-gray-300"
-                                      }`}
-                                    />
-                                  ))}
-                                </div>
-                                <span className="text-sm font-medium">
-                                  {booking.rating}/5
-                                </span>
-                              </div>
-                              {booking.review && (
-                                <p className="text-sm text-gray-600 dark:text-gray-400 italic">
-                                  &quot;{booking.review}&quot;
-                                </p>
-                              )}
-                            </div>
-                          )}
-
                           {/* Action Buttons */}
                           <div className="flex flex-wrap gap-2">
-                            {booking.status === "upcoming" && (
+                            {booking.status === "pending_payment" && (
+                              <Link href={`/payment?bookingId=${booking.id}`}>
+                                <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                                  Pay Now
+                                </Button>
+                              </Link>
+                            )}
+                            {(booking.status === "confirmed" || booking.status === "assigned") && (
                               <>
                                 <Button variant="outline" size="sm">
                                   <RefreshCw className="h-4 w-4 mr-2" />
@@ -310,7 +277,7 @@ export default function BookingsPage() {
                             {booking.status === "in-progress" && (
                               <Button variant="outline" size="sm">
                                 <Phone className="h-4 w-4 mr-2" />
-                                Contact Provider
+                                Contact Technician
                               </Button>
                             )}
                             {booking.status === "completed" && !booking.rating && (
@@ -332,42 +299,6 @@ export default function BookingsPage() {
               </motion.div>
             ))
           )}
-        </div>
-
-        {/* Quick Stats */}
-        <div className="mt-12 grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {bookings.filter(b => b.status === "upcoming").length}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Upcoming</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {bookings.filter(b => b.status === "completed").length}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Completed</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-yellow-600">
-                {bookings.filter(b => b.status === "in-progress").length}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">In Progress</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-red-600">
-                {bookings.filter(b => b.status === "cancelled").length}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Cancelled</div>
-            </CardContent>
-          </Card>
         </div>
       </div>
       <Footer />

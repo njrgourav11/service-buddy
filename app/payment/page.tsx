@@ -81,7 +81,7 @@ function PaymentContent() {
                 // Handle Cash Payment
                 const result = await updatePaymentStatusCash(booking.id, token);
                 if (result.success) {
-                    router.push("/payment/success");
+                    router.push(`/payment/success?bookingId=${booking.id}`);
                 } else {
                     throw new Error(result.error);
                 }
@@ -111,7 +111,7 @@ function PaymentContent() {
                     // Verify payment and update booking via Server Action
                     const verifyRes = await verifyPayment(booking.id, response, token);
                     if (verifyRes.success) {
-                        router.push("/payment/success");
+                        router.push(`/payment/success?bookingId=${booking.id}`);
                     } else {
                         alert("Payment verification failed: " + verifyRes.error);
                     }
