@@ -3,6 +3,54 @@
 import { adminDb, adminAuth } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
 import { notifyAdmins } from "./notification";
+import { technicianSchema } from "@/lib/validations";
+
+export async function registerTechnician(data: any, token: string) {
+    try {
+        const decodedToken = await adminAuth.verifyIdToken(token);
+        const uid = decodedToken.uid;
+
+        // 1. Validate Data
+        const validationResult = technicianSchema.safeParse(data);
+        if (!validationResult.success) {
+            return { success: false, error: validationResult.error.issues[0].message };
+        }
+        const validData = validationResult.data;
+
+        // 2. Update User Role
+        await adminDb.collection("users").doc(uid).set({
+            email: validData.email,
+            displayName: validData.fullName,
+            role: "technician",
+            phone: validData.phone,
+            createdAt: new Date().toISOString() // Or keep original if exists, but set merge: true
+        }, { merge: true });
+
+        // 3. Create Technician Profile
+        await adminDb.collection("technicians").doc(uid).set({
+            userId: uid,
+            ...validData,
+            status: "pending",
+            rating: 0,
+            completedJobs: 0,
+            joinedAt: new Date().toISOString()
+        });
+
+        // 4. Notify Admins
+        await notifyAdmins(
+            "New Technician Application",
+            `${validData.fullName} has applied to be a ${validData.category}`,
+            "info",
+            "/admin"
+        );
+
+        revalidatePath("/technician/dashboard");
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error registering technician:", error);
+        return { success: false, error: error.message };
+    }
+}
 
 export async function acceptJob(jobId: string, token: string) {
     try {
