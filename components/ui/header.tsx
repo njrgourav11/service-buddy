@@ -45,7 +45,9 @@ import {
     LogOut,
     User,
     LayoutDashboard,
+    ShoppingCart,
 } from 'lucide-react';
+import { useCart } from "@/context/CartContext";
 
 type LinkItem = {
     title: string;
@@ -58,6 +60,7 @@ export function Header() {
     const [open, setOpen] = React.useState(false);
     const scrolled = useScroll(10);
     const { user, role, logout } = useAuth();
+    const { cartCount } = useCart();
 
     const pathname = usePathname();
 
@@ -84,12 +87,12 @@ export function Header() {
             })}
         >
             <nav className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4">
-                <div className="flex items-center gap-5">
-                    <Link href="/" className="flex items-center gap-2 hover:bg-accent rounded-md p-2">
-                        <div className="bg-black dark:bg-white text-white dark:text-black p-2 rounded-lg group-hover:scale-105 transition-transform">
-                            <Wrench className="h-5 w-5" />
+                <div className="flex items-center gap-2 sm:gap-5">
+                    <Link href="/" className="flex items-center gap-1 sm:gap-2 hover:bg-accent rounded-md p-1 sm:p-2">
+                        <div className="bg-black dark:bg-white text-white dark:text-black p-1.5 sm:p-2 rounded-lg group-hover:scale-105 transition-transform">
+                            <Wrench className="h-4 w-4 sm:h-5 sm:w-5" />
                         </div>
-                        <span className="text-xl font-bold text-gray-900 dark:text-white">Service<span className="text-blue-600 dark:text-blue-400">Buddy</span></span>
+                        <span className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white">Service<span className="text-blue-600 dark:text-blue-400">Buddy</span></span>
                     </Link>
                     <NavigationMenu className="hidden md:flex">
                         <NavigationMenuList>
@@ -204,17 +207,31 @@ export function Header() {
                         </>
                     )}
                 </div>
-                <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => setOpen(!open)}
-                    className="md:hidden"
-                    aria-expanded={open}
-                    aria-controls="mobile-menu"
-                    aria-label="Toggle menu"
-                >
-                    <MenuToggleIcon open={open} className="size-5" duration={300} />
-                </Button>
+                {/* Mobile Actions */}
+                <div className="flex items-center gap-1 md:hidden">
+                    <Button variant="ghost" size="icon" asChild className="relative">
+                        <Link href="/cart">
+                            <ShoppingCart className="h-5 w-5" />
+                            {cartCount > 0 && (
+                                <span className="absolute top-0 right-0 h-4 w-4 bg-red-600 text-white text-[10px] font-bold flex items-center justify-center rounded-full">
+                                    {cartCount}
+                                </span>
+                            )}
+                        </Link>
+                    </Button>
+                    <NotificationBell />
+                    <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => setOpen(!open)}
+                        className="ml-1"
+                        aria-expanded={open}
+                        aria-controls="mobile-menu"
+                        aria-label="Toggle menu"
+                    >
+                        <MenuToggleIcon open={open} className="size-5" duration={300} />
+                    </Button>
+                </div>
             </nav>
             <MobileMenu open={open} className="flex flex-col justify-between gap-2 overflow-y-auto">
                 <NavigationMenu className="max-w-full">
@@ -237,12 +254,6 @@ export function Header() {
                         <span className="text-sm font-medium">Theme</span>
                         <ToggleTheme />
                     </div>
-                    {user && (
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium">Notifications</span>
-                            <NotificationBell />
-                        </div>
-                    )}
 
                     {user ? (
                         <>
