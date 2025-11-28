@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { MenuToggleIcon } from '@/components/ui/menu-toggle-icon';
@@ -16,6 +17,14 @@ import {
     NavigationMenuList,
     NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { LucideIcon } from 'lucide-react';
 import {
     Home,
@@ -35,6 +44,7 @@ import {
     Mail,
     LogOut,
     User,
+    LayoutDashboard,
 } from 'lucide-react';
 
 type LinkItem = {
@@ -47,7 +57,9 @@ type LinkItem = {
 export function Header() {
     const [open, setOpen] = React.useState(false);
     const scrolled = useScroll(10);
-    const { user, logout } = useAuth();
+    const { user, role, logout } = useAuth();
+
+    const pathname = usePathname();
 
     React.useEffect(() => {
         if (open) {
@@ -59,6 +71,10 @@ export function Header() {
             document.body.style.overflow = '';
         };
     }, [open]);
+
+    if (pathname.startsWith('/admin') || pathname.startsWith('/manager') || pathname.startsWith('/technician')) {
+        return null;
+    }
 
     return (
         <header
@@ -136,6 +152,36 @@ export function Header() {
                     <ToggleTheme />
                     {user ? (
                         <>
+                            {role === 'admin' ? (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost">
+                                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                                            Dashboards
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuLabel>Select Dashboard</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/admin">Admin Dashboard</Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/manager">Manager Dashboard</Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/technician">Technician Dashboard</Link>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            ) : (role === 'manager' || role === 'technician') && (
+                                <Button variant="ghost" asChild>
+                                    <Link href={role === 'manager' ? "/manager" : "/technician"}>
+                                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                                        {role === 'manager' ? "Manager" : "Technician"} Dashboard
+                                    </Link>
+                                </Button>
+                            )}
                             <Button variant="ghost" asChild>
                                 <Link href="/profile">
                                     <User className="mr-2 h-4 w-4" />
@@ -144,7 +190,7 @@ export function Header() {
                             </Button>
                             <Button variant="outline" onClick={() => logout()}>
                                 <LogOut className="mr-2 h-4 w-4" />
-                                Logout
+                                <span className="hidden lg:inline">Logout</span>
                             </Button>
                         </>
                     ) : (
@@ -200,6 +246,27 @@ export function Header() {
 
                     {user ? (
                         <>
+                            {role === 'admin' ? (
+                                <>
+                                    <div className="px-2 py-1.5 text-sm font-semibold">Dashboards</div>
+                                    <Button variant="outline" className="w-full justify-start pl-8" asChild>
+                                        <Link href="/admin">Admin Dashboard</Link>
+                                    </Button>
+                                    <Button variant="outline" className="w-full justify-start pl-8" asChild>
+                                        <Link href="/manager">Manager Dashboard</Link>
+                                    </Button>
+                                    <Button variant="outline" className="w-full justify-start pl-8" asChild>
+                                        <Link href="/technician">Technician Dashboard</Link>
+                                    </Button>
+                                </>
+                            ) : (role === 'manager' || role === 'technician') && (
+                                <Button variant="outline" className="w-full justify-start" asChild>
+                                    <Link href={role === 'manager' ? "/manager" : "/technician"}>
+                                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                                        {role === 'manager' ? "Manager" : "Technician"} Dashboard
+                                    </Link>
+                                </Button>
+                            )}
                             <Button variant="outline" className="w-full justify-start" asChild>
                                 <Link href="/profile">
                                     <User className="mr-2 h-4 w-4" />

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -18,6 +19,12 @@ import {
 } from "lucide-react"
 
 export function Footer() {
+  const pathname = usePathname();
+
+  if (pathname.startsWith('/admin') || pathname.startsWith('/manager') || pathname.startsWith('/technician')) {
+    return null;
+  }
+
   return (
     <footer className="bg-gray-900 dark:bg-black text-white pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

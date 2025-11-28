@@ -4,11 +4,11 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
-export default function TechnicianDashboardPage() {
+export default function ManagerPage() {
     const router = useRouter();
 
     useEffect(() => {
-        router.push("/technician/dashboard/overview");
+        router.push("/manager/overview");
     }, [router]);
 
     return (

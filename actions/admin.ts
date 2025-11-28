@@ -4,7 +4,7 @@ import { adminDb, adminAuth } from "@/lib/firebase-admin";
 
 export async function getAdminStats(token: string) {
     try {
-        await verifyAdmin(token);
+        await verifyManager(token);
 
         // 1. Fetch all data in parallel
         const [usersSnap, bookingsSnap, techniciansSnap] = await Promise.all([
@@ -70,7 +70,7 @@ export async function getAllUsers(token: string) {
 
 export async function assignTechnician(bookingId: string, technicianId: string, token: string) {
     try {
-        await verifyAdmin(token);
+        await verifyManager(token);
 
         const techDoc = await adminDb.collection("technicians").doc(technicianId).get();
         if (!techDoc.exists) throw new Error("Technician not found");
@@ -158,6 +158,23 @@ export async function verifyAdmin(token: string) {
     if (decodedToken.role !== 'admin' && decodedToken.admin !== true) {
         console.error("Admin verification failed for user:", decodedToken.email);
         throw new Error("Unauthorized: Admin access required");
+    }
+    return decodedToken;
+}
+
+// Helper function to verify manager (allows admin or manager)
+export async function verifyManager(token: string) {
+    const decodedToken = await adminAuth.verifyIdToken(token);
+
+    console.log("Verifying Manager Token:", {
+        uid: decodedToken.uid,
+        email: decodedToken.email,
+        role: decodedToken.role
+    });
+
+    if (decodedToken.role !== 'admin' && decodedToken.role !== 'manager' && decodedToken.admin !== true) {
+        console.error("Manager verification failed for user:", decodedToken.email);
+        throw new Error("Unauthorized: Manager access required");
     }
     return decodedToken;
 }
