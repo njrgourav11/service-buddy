@@ -98,10 +98,11 @@ export async function getUserBookings(token: string) {
     }
 }
 
+import { verifyAdmin } from "./admin";
+
 export async function getAllBookings(token: string) {
     try {
-        await adminAuth.verifyIdToken(token);
-        // Add admin check
+        await verifyAdmin(token);
 
         const snapshot = await adminDb.collection("bookings")
             .orderBy("createdAt", "desc")

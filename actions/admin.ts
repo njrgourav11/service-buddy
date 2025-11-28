@@ -4,8 +4,7 @@ import { adminDb, adminAuth } from "@/lib/firebase-admin";
 
 export async function getAdminStats(token: string) {
     try {
-        await adminAuth.verifyIdToken(token);
-        // Verify admin role
+        await verifyAdmin(token);
 
         // 1. Fetch all data in parallel
         const [usersSnap, bookingsSnap, techniciansSnap] = await Promise.all([
@@ -54,8 +53,7 @@ export async function getAdminStats(token: string) {
 
 export async function getAllUsers(token: string) {
     try {
-        await adminAuth.verifyIdToken(token);
-        // Add admin check here
+        await verifyAdmin(token);
 
         const usersSnap = await adminDb.collection("users").orderBy("createdAt", "desc").get();
         const users = usersSnap.docs.map(doc => ({
@@ -72,16 +70,30 @@ export async function getAllUsers(token: string) {
 
 export async function assignTechnician(bookingId: string, technicianId: string, token: string) {
     try {
-        await adminAuth.verifyIdToken(token);
-        // Admin check
+        await verifyAdmin(token);
 
         const techDoc = await adminDb.collection("technicians").doc(technicianId).get();
         if (!techDoc.exists) throw new Error("Technician not found");
         const techData = techDoc.data();
 
-        await adminDb.collection("bookings").doc(bookingId).update({
+        if (techData?.status !== "approved") {
+            throw new Error("Technician is not approved");
+        }
+
+        // Check booking status
+        const bookingRef = adminDb.collection("bookings").doc(bookingId);
+        const bookingDoc = await bookingRef.get();
+        if (!bookingDoc.exists) throw new Error("Booking not found");
+
+        const bookingData = bookingDoc.data();
+        if (bookingData?.status === "completed" || bookingData?.status === "cancelled") {
+            throw new Error("Cannot assign technician to a completed or cancelled booking");
+        }
+
+        await bookingRef.update({
             technicianId,
             technicianName: techData?.fullName,
+            technicianPhone: techData?.phone || "",
             status: "assigned",
             updatedAt: new Date().toISOString()
         });
@@ -94,8 +106,7 @@ export async function assignTechnician(bookingId: string, technicianId: string, 
 
 export async function updateUserRole(userId: string, role: string, token: string) {
     try {
-        await adminAuth.verifyIdToken(token);
-        // Admin check
+        await verifyAdmin(token);
 
         await adminDb.collection("users").doc(userId).update({ role });
         await adminAuth.setCustomUserClaims(userId, { role });
@@ -108,8 +119,7 @@ export async function updateUserRole(userId: string, role: string, token: string
 
 export async function approveTechnician(technicianId: string, status: "approved" | "rejected", token: string) {
     try {
-        await adminAuth.verifyIdToken(token);
-        // Admin check
+        await verifyAdmin(token);
 
         await adminDb.collection("technicians").doc(technicianId).update({
             status,
@@ -130,4 +140,15 @@ export async function approveTechnician(technicianId: string, status: "approved"
     } catch (error: any) {
         return { success: false, error: error.message };
     }
+}
+
+// Helper function to verify admin
+export async function verifyAdmin(token: string) {
+    const decodedToken = await adminAuth.verifyIdToken(token);
+
+    // Check for custom claim 'role' or 'admin' property
+    if (decodedToken.role !== 'admin' && decodedToken.admin !== true) {
+        throw new Error("Unauthorized: Admin access required");
+    }
+    return decodedToken;
 }

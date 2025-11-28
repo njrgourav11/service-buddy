@@ -21,9 +21,9 @@ export async function registerTechnician(data: any, token: string) {
         await adminDb.collection("users").doc(uid).set({
             email: validData.email,
             displayName: validData.fullName,
-            role: "technician",
+            // role: "technician", // Only set after approval
             phone: validData.phone,
-            createdAt: new Date().toISOString() // Or keep original if exists, but set merge: true
+            createdAt: new Date().toISOString()
         }, { merge: true });
 
         // 3. Create Technician Profile
@@ -217,10 +217,11 @@ export async function getTechnicianStats(token: string) {
     }
 }
 
+import { verifyAdmin } from "./admin";
+
 export async function getAllTechnicians(token: string) {
     try {
-        await adminAuth.verifyIdToken(token);
-        // Add admin check
+        await verifyAdmin(token);
 
         const snapshot = await adminDb.collection("technicians")
             .orderBy("joinedAt", "desc")
@@ -240,13 +241,20 @@ export async function getAllTechnicians(token: string) {
 
 export async function approveTechnician(technicianId: string, token: string) {
     try {
-        await adminAuth.verifyIdToken(token);
-        // Add admin check
+        await verifyAdmin(token);
 
         await adminDb.collection("technicians").doc(technicianId).update({
             status: "approved",
             updatedAt: new Date().toISOString()
         });
+
+        // Also update user role to technician if not already
+        const techDoc = await adminDb.collection("technicians").doc(technicianId).get();
+        const userId = techDoc.data()?.userId;
+        if (userId) {
+            await adminDb.collection("users").doc(userId).update({ role: "technician" });
+            await adminAuth.setCustomUserClaims(userId, { role: "technician" });
+        }
 
         revalidatePath("/admin/technicians");
         return { success: true };

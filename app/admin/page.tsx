@@ -76,7 +76,8 @@ export default function AdminDashboard() {
 
     try {
       setLoading(true);
-      const token = await user.getIdToken();
+      // Force token refresh to get latest claims
+      const token = await user.getIdToken(true);
       const result = await getAdminStats(token);
 
       if (result.success && result.data && result.stats) {
