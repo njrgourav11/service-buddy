@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,11 +20,13 @@ import {
   Loader2,
   Plus,
   Pencil,
-  Trash2
+  Trash2,
+  Star
 } from "lucide-react";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, doc, updateDoc, addDoc, deleteDoc } from "firebase/firestore";
-import { updateProfile } from "firebase/auth";
+import { collection, query, where, getDocs, doc, addDoc, deleteDoc } from "firebase/firestore";
+import { updateUserProfile } from "@/actions/user";
+import { createReview } from "@/actions/reviews";
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
@@ -39,11 +40,16 @@ export default function ProfilePage() {
   const [profileForm, setProfileForm] = useState({ displayName: "", phone: "" });
   const [addressForm, setAddressForm] = useState({ title: "", address: "", city: "", zip: "" });
 
+  // Review State
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
+
   useEffect(() => {
     if (user) {
       setProfileForm({
         displayName: user.displayName || "",
-        phone: user.phoneNumber || "" // Note: phone might be in firestore user doc if not in auth
+        phone: user.phoneNumber || ""
       });
     }
   }, [user]);
@@ -83,14 +89,16 @@ export default function ProfilePage() {
   const handleUpdateProfile = async () => {
     if (!user) return;
     try {
-      await updateProfile(user, { displayName: profileForm.displayName });
-      // Also update in Firestore
-      await updateDoc(doc(db, "users", user.uid), {
-        firstName: profileForm.displayName.split(" ")[0],
-        lastName: profileForm.displayName.split(" ").slice(1).join(" "),
-        phone: profileForm.phone
-      });
-      setIsEditingProfile(false);
+      const token = await user.getIdToken();
+      const result = await updateUserProfile(profileForm, token);
+
+      if (result.success) {
+        setIsEditingProfile(false);
+        // Ideally show a toast here
+      } else {
+        console.error(result.error);
+        alert("Failed to update profile: " + result.error);
+      }
     } catch (error) {
       console.error("Error updating profile:", error);
     }
@@ -116,6 +124,25 @@ export default function ProfilePage() {
       setAddresses(addresses.filter(addr => addr.id !== id));
     } catch (error) {
       console.error("Error deleting address:", error);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!user || !selectedBookingId) return;
+    try {
+      const token = await user.getIdToken();
+      const result = await createReview({ ...reviewForm, bookingId: selectedBookingId }, token);
+
+      if (result.success) {
+        setIsReviewOpen(false);
+        setReviewForm({ rating: 5, comment: "" });
+        setSelectedBookingId(null);
+        alert("Review submitted successfully!");
+      } else {
+        alert("Failed to submit review: " + result.error);
+      }
+    } catch (error) {
+      console.error("Error submitting review:", error);
     }
   };
 
@@ -229,6 +256,20 @@ export default function ProfilePage() {
                                 {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                               </Badge>
                               <p className="font-bold mt-2">₹{booking.amount}</p>
+
+                              {booking.status === "completed" && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="mt-4 w-full"
+                                  onClick={() => {
+                                    setSelectedBookingId(booking.id);
+                                    setIsReviewOpen(true);
+                                  }}
+                                >
+                                  <Star className="mr-2 h-4 w-4" /> Leave a Review
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </CardContent>
@@ -397,6 +438,43 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Review Dialog */}
+      <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rate Service</DialogTitle>
+            <DialogDescription>How was your experience?</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex justify-center space-x-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                  className={`p-2 rounded-full transition-colors ${reviewForm.rating >= star ? "text-yellow-400" : "text-gray-300"
+                    }`}
+                >
+                  <Star className="h-8 w-8 fill-current" />
+                </button>
+              ))}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="comment">Comment</Label>
+              <Textarea
+                id="comment"
+                placeholder="Tell us about your experience..."
+                value={reviewForm.comment}
+                onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleSubmitReview}>Submit Review</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div >
   );
 }

@@ -14,6 +14,7 @@ import { db, auth } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { Loader2, CheckCircle2, MapPin, User, Briefcase, FileText, Upload } from "lucide-react";
+import { registerTechnician } from "@/actions/technician";
 
 const STEPS = [
     { id: 1, title: "Basic Info", icon: User },
@@ -100,7 +101,26 @@ export default function TechnicianOnboarding() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const validateStep = () => {
+        switch (step) {
+            case 1:
+                return formData.fullName && formData.phone && formData.email && (user || formData.password);
+            case 2:
+                return formData.address && formData.city && formData.zip;
+            case 3:
+                return formData.category && formData.experience && formData.bio;
+            case 4:
+                return true; // Documents are optional for now or mock
+            default:
+                return true;
+        }
+    };
+
     const handleNext = () => {
+        if (!validateStep()) {
+            alert("Please fill in all required fields.");
+            return;
+        }
         if (step < 5) setStep(step + 1);
     };
 
@@ -111,40 +131,29 @@ export default function TechnicianOnboarding() {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            let userId = user?.uid;
-
+            let userCredential;
             // Create user if not logged in
             if (!user) {
-                const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-                userId = userCredential.user.uid;
+                userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
                 await updateProfile(userCredential.user, { displayName: formData.fullName });
             }
 
-            if (!userId) throw new Error("User ID missing");
+            const currentUser = user || userCredential?.user;
+            if (!currentUser) throw new Error("User creation failed");
 
-            // 1. Update User Role
-            await setDoc(doc(db, "users", userId), {
-                email: formData.email,
-                displayName: formData.fullName,
-                role: "technician",
-                phone: formData.phone,
-                createdAt: new Date().toISOString()
-            }, { merge: true });
+            const token = await currentUser.getIdToken();
 
-            // 2. Create Technician Profile
-            await setDoc(doc(db, "technicians", userId), {
-                userId: userId,
-                ...formData,
-                status: "pending", // pending, approved, rejected
-                rating: 0,
-                completedJobs: 0,
-                joinedAt: new Date().toISOString()
-            });
+            // Call Server Action
+            const result = await registerTechnician(formData, token);
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
 
             router.push("/technician/dashboard");
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error submitting application:", error);
-            alert("Failed to submit application. Please try again.");
+            alert(error.message || "Failed to submit application. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -165,8 +174,8 @@ export default function TechnicianOnboarding() {
                             return (
                                 <div key={s.id} className="flex flex-col items-center bg-gray-50 dark:bg-gray-950 px-2">
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isActive || isCompleted
-                                            ? "bg-blue-600 border-blue-600 text-white"
-                                            : "bg-white dark:bg-gray-900 border-gray-300 text-gray-400"
+                                        ? "bg-blue-600 border-blue-600 text-white"
+                                        : "bg-white dark:bg-gray-900 border-gray-300 text-gray-400"
                                         }`}>
                                         <Icon className="h-5 w-5" />
                                     </div>

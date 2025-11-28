@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader } from 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { NotificationBell } from "@/components/notification-bell"
 import { useAuth } from "@/context/AuthContext"
 import {
   Search,
@@ -32,7 +33,9 @@ import {
   Leaf,
   Star,
   MapIcon,
-  X
+  X,
+  BookOpen,
+  Info
 } from "lucide-react"
 
 const serviceCategories = [
@@ -227,6 +230,7 @@ export function Navigation() {
           {/* Auth Buttons & Theme Toggle */}
           <div className="hidden lg:flex items-center space-x-4">
             <ThemeToggle />
+            <NotificationBell />
             <div className="h-6 w-px bg-gray-200 dark:bg-gray-700" />
 
             {user ? (
@@ -264,6 +268,7 @@ export function Navigation() {
 
           {/* Mobile Menu */}
           <div className="md:hidden flex items-center space-x-2">
+            <NotificationBell />
             <ThemeToggle />
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
@@ -314,6 +319,22 @@ export function Navigation() {
                     </div>
 
                     <div className="border-t pt-6 space-y-4">
+                      <Link
+                        href="/blog"
+                        className="flex items-center space-x-3 p-2 font-medium"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <BookOpen className="h-5 w-5" />
+                        <span>Blog</span>
+                      </Link>
+                      <Link
+                        href="/about"
+                        className="flex items-center space-x-3 p-2 font-medium"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Info className="h-5 w-5" />
+                        <span>About</span>
+                      </Link>
                       <Link
                         href="/profile"
                         className="flex items-center space-x-3 p-2 font-medium"

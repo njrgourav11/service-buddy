@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { MenuToggleIcon } from '@/components/ui/menu-toggle-icon';
 import { ToggleTheme } from '@/components/ui/toggle-theme';
+import { NotificationBell } from "@/components/notification-bell";
 import { createPortal } from 'react-dom';
 import {
     NavigationMenu,
@@ -127,6 +128,7 @@ export function Header() {
                     </NavigationMenu>
                 </div>
                 <div className="hidden items-center gap-2 md:flex">
+                    <NotificationBell />
                     <ToggleTheme />
                     <Button variant="outline" asChild>
                         <Link href="/auth/login">Sign In</Link>

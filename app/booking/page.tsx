@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { format, addDays } from "date-fns";
+import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -15,17 +15,20 @@ import {
     ChevronLeft,
     ChevronRight,
     MapPin,
-    Clock,
     Calendar as CalendarIcon,
     CheckCircle2,
-    CreditCard,
     Plus,
     Loader2
 } from "lucide-react";
 import { getServiceById, Service } from "@/lib/db/services";
 import { useAuth } from "@/context/AuthContext";
-import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { createBooking } from "@/actions/booking";
+import dynamic from "next/dynamic";
+
+const MapPicker = dynamic(() => import("@/components/MapPicker"), {
+    ssr: false,
+    loading: () => <div className="h-[300px] w-full bg-gray-100 animate-pulse rounded-xl flex items-center justify-center">Loading Map...</div>
+});
 
 const steps = [
     { id: 1, title: "Select Slot" },
@@ -58,6 +61,8 @@ function BookingContent() {
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [selectedAddress, setSelectedAddress] = useState<string>(savedAddresses[0].id);
     const [newAddress, setNewAddress] = useState(false);
+    const [mapLocation, setMapLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+    const [customAddress, setCustomAddress] = useState("");
 
     const [service, setService] = useState<Service | null>(null);
     const [loading, setLoading] = useState(true);
@@ -101,9 +106,16 @@ function BookingContent() {
         setProcessing(true);
 
         try {
+            const token = await user.getIdToken();
             const selectedPkg = service.packages[packageType];
             const amount = selectedPkg ? selectedPkg.price : service.price;
-            const addressStr = savedAddresses.find(a => a.id === selectedAddress)?.address || "Custom Address";
+
+            let addressStr = "";
+            if (selectedAddress === "new" && mapLocation) {
+                addressStr = customAddress || mapLocation.address;
+            } else {
+                addressStr = savedAddresses.find(a => a.id === selectedAddress)?.address || "Custom Address";
+            }
 
             const bookingData = {
                 userId: user.uid,
@@ -115,16 +127,19 @@ function BookingContent() {
                 date: date?.toISOString(),
                 time: selectedTime,
                 address: addressStr,
-                status: "pending_payment",
-                technicianId: null,
-                createdAt: new Date().toISOString() // Using string for easier client handling
             };
 
-            const docRef = await addDoc(collection(db, "bookings"), bookingData);
-            router.push(`/payment?bookingId=${docRef.id}`);
+            const result = await createBooking(bookingData, token);
+
+            if (result.success) {
+                router.push(`/payment?bookingId=${result.bookingId}`);
+            } else {
+                alert(result.error || "Failed to create booking");
+            }
         } catch (error) {
             console.error("Error creating booking:", error);
             alert("Failed to create booking. Please try again.");
+        } finally {
             setProcessing(false);
         }
     };
@@ -247,33 +262,29 @@ function BookingContent() {
                                         ))}
                                     </RadioGroup>
 
-                                    <Button variant="outline" className="w-full border-dashed h-12 rounded-xl" onClick={() => setNewAddress(true)}>
+                                    <Button variant="outline" className="w-full border-dashed h-12 rounded-xl" onClick={() => { setSelectedAddress("new"); setNewAddress(true); }}>
                                         <Plus className="h-4 w-4 mr-2" /> Add New Address
                                     </Button>
 
-                                    {newAddress && (
+                                    {selectedAddress === "new" && (
                                         <motion.div
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: "auto" }}
                                             className="space-y-4 pt-4 border-t"
                                         >
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label>House/Flat No.</Label>
-                                                    <Input placeholder="e.g. 402" className="rounded-xl" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>Landmark</Label>
-                                                    <Input placeholder="Near City Mall" className="rounded-xl" />
-                                                </div>
-                                            </div>
+                                            <MapPicker onLocationSelect={(loc) => {
+                                                setMapLocation(loc);
+                                                setCustomAddress(loc.address);
+                                            }} />
+
                                             <div className="space-y-2">
                                                 <Label>Full Address</Label>
-                                                <Input placeholder="Enter complete address" className="rounded-xl" />
-                                            </div>
-                                            <div className="flex justify-end space-x-2">
-                                                <Button variant="ghost" onClick={() => setNewAddress(false)}>Cancel</Button>
-                                                <Button onClick={() => setNewAddress(false)}>Save Address</Button>
+                                                <Input
+                                                    placeholder="Enter complete address"
+                                                    className="rounded-xl"
+                                                    value={customAddress}
+                                                    onChange={(e) => setCustomAddress(e.target.value)}
+                                                />
                                             </div>
                                         </motion.div>
                                     )}
@@ -313,7 +324,7 @@ function BookingContent() {
                                                 <div>
                                                     <p className="text-sm text-gray-500">Address</p>
                                                     <p className="font-semibold text-sm max-w-[200px] truncate">
-                                                        {savedAddresses.find(a => a.id === selectedAddress)?.address}
+                                                        {selectedAddress === "new" ? (customAddress || mapLocation?.address) : savedAddresses.find(a => a.id === selectedAddress)?.address}
                                                     </p>
                                                 </div>
                                             </div>
@@ -353,7 +364,7 @@ function BookingContent() {
                             onClick={handleNext}
                             disabled={
                                 (currentStep === 1 && (!date || !selectedTime)) ||
-                                (currentStep === 2 && !selectedAddress) ||
+                                (currentStep === 2 && (!selectedAddress || (selectedAddress === "new" && !customAddress))) ||
                                 processing
                             }
                             className="bg-blue-600 hover:bg-blue-700 min-w-[140px] rounded-xl shadow-lg hover:shadow-blue-500/25"
