@@ -102,7 +102,7 @@ export function Navigation() {
   const [servicesOpen, setServicesOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
-  const { user, logout } = useAuth()
+  const { user, logout, loading } = useAuth()
 
   // Handle scroll effect
   useEffect(() => {
@@ -118,8 +118,8 @@ export function Navigation() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || !isHomePage
-        ? "bg-white dark:bg-gray-950 shadow-sm border-b border-gray-200 dark:border-gray-800"
-        : "bg-transparent"
+          ? "bg-white dark:bg-gray-950 shadow-sm border-b border-gray-200 dark:border-gray-800"
+          : "bg-transparent"
         }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -233,7 +233,9 @@ export function Navigation() {
             <NotificationBell />
             <div className="h-6 w-px bg-gray-200 dark:bg-gray-700" />
 
-            {user ? (
+            {loading ? (
+              <div className="h-10 w-24 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-lg" />
+            ) : user ? (
               <div className="flex items-center space-x-4">
                 <Button variant="ghost" className="font-medium" asChild>
                   <Link href="/profile">
@@ -335,14 +337,28 @@ export function Navigation() {
                         <Info className="h-5 w-5" />
                         <span>About</span>
                       </Link>
-                      <Link
-                        href="/profile"
-                        className="flex items-center space-x-3 p-2 font-medium"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <UserPlus className="h-5 w-5" />
-                        <span>Profile</span>
-                      </Link>
+                      {user && (
+                        <>
+                          <Link
+                            href="/profile"
+                            className="flex items-center space-x-3 p-2 font-medium"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <UserPlus className="h-5 w-5" />
+                            <span>Profile</span>
+                          </Link>
+                          <button
+                            onClick={() => {
+                              logout()
+                              setMobileMenuOpen(false)
+                            }}
+                            className="flex items-center space-x-3 p-2 font-medium w-full text-left text-red-600"
+                          >
+                            <LogOut className="h-5 w-5" />
+                            <span>Logout</span>
+                          </button>
+                        </>
+                      )}
                       <Link
                         href="/support"
                         className="flex items-center space-x-3 p-2 font-medium"
@@ -356,7 +372,9 @@ export function Navigation() {
 
                   {/* Mobile Auth Buttons */}
                   <div className="p-5 border-t bg-gray-50 dark:bg-gray-800/50">
-                    {user ? (
+                    {loading ? (
+                      <div className="h-10 w-full bg-gray-200 dark:bg-gray-800 animate-pulse rounded-lg" />
+                    ) : user ? (
                       <div className="space-y-3">
                         <div className="flex items-center space-x-3 px-2 mb-4">
                           <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
@@ -367,13 +385,6 @@ export function Navigation() {
                             <p className="text-xs text-gray-500">{user.email}</p>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => {
-                          logout()
-                          setMobileMenuOpen(false)
-                        }}>
-                          <LogOut className="mr-2 h-4 w-4" />
-                          Logout
-                        </Button>
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 gap-4">
