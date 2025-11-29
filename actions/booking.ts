@@ -39,7 +39,7 @@ export async function createBooking(data: any, token: string) {
             "New Booking",
             `New booking by ${validData.userName} for ${validData.serviceName}`,
             "info",
-            `/admin/bookings/${bookingRef.id}`
+            `/admin/bookings`
         );
 
         return { success: true, bookingId: bookingRef.id };

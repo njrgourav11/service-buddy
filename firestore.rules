@@ -9,6 +9,7 @@ service cloud.firestore {
     // Helper function to check if user is admin
     function isAdmin() {
       return isSignedIn() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
@@ -18,13 +19,11 @@ service cloud.firestore {
     }
 
     // Users collection
-    // Admins can read/write all. Users can read/write their own.
-    // Prevent users from updating their own role.
     match /users/{userId} {
       allow read: if isSignedIn() && (isOwner(userId) || isAdmin());
-      allow create: if isSignedIn() && isOwner(userId) && !('role' in request.resource.data);
-      allow update: if isSignedIn() && isOwner(userId) && !('role' in request.resource.data.diff(resource.data).affectedKeys());
-      allow delete: if false; // Users cannot delete themselves
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId);
+      allow delete: if false; 
 
       match /addresses/{addressId} {
         allow read, write: if isSignedIn() && (isOwner(userId) || isAdmin());
@@ -32,23 +31,27 @@ service cloud.firestore {
     }
 
     // Services collection
-    // Public read. Write restricted to Admin SDK (server-side) or Admin users.
     match /services/{serviceId} {
       allow read: if true;
-      allow write: if false; // Writes should be done via Admin SDK or Server Actions
+      allow write: if isAdmin();
     }
 
     // Bookings collection
-    // Admins read all. Users read their own.
-    // WRITES BLOCKED: Must use Server Actions.
     match /bookings/{bookingId} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin() || resource.data.technicianId == request.auth.uid);
-      allow write: if false; // All booking mutations must go through Server Actions
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || 
+        isAdmin() || 
+        resource.data.technicianId == request.auth.uid
+      );
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || 
+        isAdmin() ||
+        resource.data.technicianId == request.auth.uid
+      );
     }
 
     // Technicians collection
-    // Admins read/write all. 
-    // Onboarding: Allow create if auth.
     match /technicians/{techId} {
       allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;

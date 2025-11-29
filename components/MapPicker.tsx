@@ -17,7 +17,7 @@ const icon = L.icon({
 });
 
 interface MapPickerProps {
-    onLocationSelect: (location: { lat: number; lng: number; address: string }) => void;
+    onLocationSelect: (location: { lat: number; lng: number; address: string; addressDetails?: any }) => void;
     initialLocation?: { lat: number; lng: number };
 }
 
@@ -36,11 +36,17 @@ function LocationMarker({ onLocationSelect }: { onLocationSelect: (lat: number, 
     );
 }
 
+import { useToast } from "@/context/ToastContext";
+
+// ... (imports remain same)
+
 export default function MapPicker({ onLocationSelect, initialLocation }: MapPickerProps) {
     const [loading, setLoading] = useState(false);
     const [position, setPosition] = useState<{ lat: number; lng: number } | null>(initialLocation || null);
+    const { showToast } = useToast();
 
     const handleLocationSelect = async (lat: number, lng: number) => {
+        // ... (implementation remains same)
         setPosition({ lat, lng });
         setLoading(true);
         try {
@@ -50,7 +56,8 @@ export default function MapPicker({ onLocationSelect, initialLocation }: MapPick
             onLocationSelect({
                 lat,
                 lng,
-                address: data.display_name || "Unknown Location"
+                address: data.display_name || "Unknown Location",
+                addressDetails: data.address
             });
         } catch (error) {
             console.error("Error reverse geocoding:", error);
@@ -71,7 +78,11 @@ export default function MapPicker({ onLocationSelect, initialLocation }: MapPick
                 (err) => {
                     console.error("Error getting location:", err);
                     setLoading(false);
-                    alert("Could not get your location. Please enable location services.");
+                    showToast({
+                        title: "Location Error",
+                        description: "Could not get your location. Please enable location services.",
+                        variant: "error",
+                    });
                 }
             );
         }

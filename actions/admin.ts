@@ -106,7 +106,7 @@ export async function assignTechnician(bookingId: string, technicianId: string, 
                 "Technician Assigned",
                 `${techData?.fullName} has been assigned to your booking for ${bookingData?.serviceName}.`,
                 "info",
-                `/bookings/${bookingId}`
+                `/profile/bookings`
             );
         }
 
@@ -116,7 +116,7 @@ export async function assignTechnician(bookingId: string, technicianId: string, 
             "New Job Assigned",
             `You have been assigned a new job: ${bookingData?.serviceName} for ${bookingData?.userName}.`,
             "info",
-            `/technician/jobs/${bookingId}`
+            `/technician/dashboard/my-jobs`
         );
 
         return { success: true };

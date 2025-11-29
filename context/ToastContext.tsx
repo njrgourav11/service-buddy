@@ -34,8 +34,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     return (
         <ToastContext.Provider value={{ showToast, removeToast }}>
             {children}
-            <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 w-full max-w-sm pointer-events-none">
-                <AnimatePresence>
+            <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 w-full max-w-[320px] pointer-events-none">
+                <AnimatePresence mode="popLayout">
                     {toasts.map((toast) => (
                         <div key={toast.id} className="pointer-events-auto">
                             <AlertToast

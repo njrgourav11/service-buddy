@@ -129,6 +129,16 @@ function DialogDescription({
   )
 }
 
+function DialogBody({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="dialog-body"
+      className={cn("px-4 py-6", className)}
+      {...props}
+    />
+  )
+}
+
 export {
   Dialog,
   DialogClose,
@@ -140,4 +150,5 @@ export {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
+  DialogBody,
 }
