@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, MapPin, Star, Trash2, Plus, Pencil, Map } from 'lucide-react';
+import { Calendar, Clock, MapPin, Star, Trash2, Plus, Pencil, Map, Loader2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import dynamic from 'next/dynamic';
@@ -51,6 +51,7 @@ export function AccountSettings({
     const [isAddingAddress, setIsAddingAddress] = React.useState(false);
     const [addressForm, setAddressForm] = React.useState({ title: "", addressLine1: "", addressLine2: "", city: "", state: "", zip: "" });
     const [showMap, setShowMap] = React.useState(false);
+    const [isSaving, setIsSaving] = React.useState(false);
 
     const handleUpload = async (file: File) => {
         // Optimistic update
@@ -68,7 +69,12 @@ export function AccountSettings({
     };
 
     const handleSaveProfile = async () => {
-        await onUpdateProfile({ displayName, phone });
+        setIsSaving(true);
+        try {
+            await onUpdateProfile({ displayName, phone });
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleSaveAddress = async () => {
@@ -174,8 +180,20 @@ export function AccountSettings({
                                 <Input value={user?.email} disabled className="bg-muted" />
                             </div>
                             <div className="flex justify-end">
-                                <Button onClick={handleSaveProfile} variant="outline" className="text-xs md:text-sm">
-                                    Save Changes
+                                <Button
+                                    onClick={handleSaveProfile}
+                                    disabled={isSaving}
+                                    variant="outline"
+                                    className="text-xs md:text-sm"
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        "Save Changes"
+                                    )}
                                 </Button>
                             </div>
                         </div>

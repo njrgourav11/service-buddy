@@ -3,23 +3,24 @@
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 
 export async function updateUserProfile(data: any, token: string) {
+    console.log("updateUserProfile called with data:", data);
     try {
         const decodedToken = await adminAuth.verifyIdToken(token);
         const uid = decodedToken.uid;
+        console.log("User verified:", uid);
 
         // Update Firestore
         await adminDb.collection('users').doc(uid).set(data, { merge: true });
+        console.log("Firestore updated for user:", uid);
 
         // Update Auth Profile if applicable
         const authUpdates: any = {};
         if (data.displayName) authUpdates.displayName = data.displayName;
         if (data.photoURL) authUpdates.photoURL = data.photoURL;
 
-        // Note: Phone number update in Auth is sensitive and requires strict formatting/uniqueness.
-        // We are only updating it in Firestore for now to avoid errors.
-
         if (Object.keys(authUpdates).length > 0) {
             await adminAuth.updateUser(uid, authUpdates);
+            console.log("Auth profile updated for user:", uid);
         }
 
         return { success: true };

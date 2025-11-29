@@ -71,10 +71,16 @@ export default function ProfilePage() {
   }, [user, authLoading]);
 
   const handleUpdateProfile = async (data: any) => {
-    if (!user) return;
+    if (!user) {
+      console.error("User not authenticated");
+      return;
+    }
     try {
+      console.log("Getting ID token...");
       const token = await user.getIdToken();
+      console.log("Calling updateUserProfile with data:", data);
       const result = await updateUserProfile(data, token);
+      console.log("updateUserProfile result:", result);
 
       if (result.success) {
         showToast({
@@ -85,7 +91,7 @@ export default function ProfilePage() {
         // Update local state to reflect changes immediately
         setUserProfile((prev: any) => ({ ...prev, ...data }));
       } else {
-        console.error(result.error);
+        console.error("Update failed:", result.error);
         showToast({
           title: "Error",
           description: "Failed to update profile: " + result.error,
