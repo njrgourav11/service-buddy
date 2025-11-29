@@ -11,6 +11,7 @@ import { BentoGrid, type BentoItem } from "@/components/ui/bento-grid";
 import { HeroGeometric } from "@/components/ui/shape-landing-hero";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 
+import HowItWorksCard from "@/components/ui/how-it-works-card";
 import ServiceCard from "@/components/ui/service-card";
 import SpotlightCTA from "@/components/ui/spotlight-cta";
 import {
@@ -106,15 +107,29 @@ export default function Home() {
               Get your home services done in 3 simple steps
             </p>
           </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-            {/* Connecting Line */}
-            <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 dark:from-blue-900 dark:via-purple-900 dark:to-pink-900 -translate-y-1/2 -z-10" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            {/* Connecting Line (Hidden on mobile, visible on desktop) */}
+            <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 dark:from-blue-900 dark:via-purple-900 dark:to-pink-900 -translate-y-1/2 -z-10 opacity-50" />
 
             {[
-              { title: "Book a Service", desc: "Choose from our wide range of services and select a convenient time.", icon: "1" },
-              { title: "Expert Arrives", desc: "Our verified professional arrives at your doorstep on time.", icon: "2" },
-              { title: "Job Done", desc: "Sit back and relax while we get the job done to your satisfaction.", icon: "3" }
+              {
+                title: "Book a Service",
+                desc: "Choose from our wide range of services and select a convenient time.",
+                step: "1",
+                image: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?auto=format&fit=crop&q=80&w=2072" // Person using tablet/checklist
+              },
+              {
+                title: "Expert Arrives",
+                desc: "Our verified professional arrives at your doorstep on time.",
+                step: "2",
+                image: "https://www.shutterstock.com/image-photo/technician-arriving-door-warm-professional-600nw-2612277443.jpg" // Professional worker
+              },
+              {
+                title: "Job Done",
+                desc: "Sit back and relax while we get the job done to your satisfaction.",
+                step: "3",
+                image: "https://media.istockphoto.com/id/1141206985/photo/working-day-is-over.jpg?s=612x612&w=0&k=20&c=-DmbVHTN0-ctDnwmy9RblTq8MeT0M-p_oHI0rTynGgQ=" // Relaxing on sofa (User provided)
+              }
             ].map((step, index) => (
               <motion.div
                 key={index}
@@ -122,15 +137,13 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.2, duration: 0.6 }}
                 viewport={{ once: true }}
-                className="flex flex-col items-center text-center bg-white dark:bg-gray-900 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 relative group hover:-translate-y-2 transition-transform duration-300"
               >
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-2xl font-bold text-white mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  {step.icon}
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{step.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                  {step.desc}
-                </p>
+                <HowItWorksCard
+                  step={step.step}
+                  title={step.title}
+                  description={step.desc}
+                  imageSrc={step.image}
+                />
               </motion.div>
             ))}
           </div>
@@ -192,12 +205,12 @@ export default function Home() {
             },
           ]} />
         </div>
-      </section>
+      </section >
 
       {/* CTA Section */}
-      <section className="w-full">
+      < section className="w-full" >
         <SpotlightCTA />
-      </section>
-    </div>
+      </section >
+    </div >
   );
 }

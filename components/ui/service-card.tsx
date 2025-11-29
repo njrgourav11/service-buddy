@@ -89,35 +89,49 @@ const Skeleton = ({ icon: Icon, color }: { icon: React.ComponentType<{ className
 };
 
 const Sparkles = ({ color }: { color?: string }) => {
-    const randomMove = () => Math.random() * 2 - 1;
-    const randomOpacity = () => Math.random();
-    const random = () => Math.random();
+    const [sparkles, setSparkles] = useState<Array<{ top: string; left: string; delay: number; duration: number }>>([]);
+
+    useEffect(() => {
+        const randomMove = () => Math.random() * 2 - 1;
+        const random = () => Math.random();
+
+        const newSparkles = [...Array(8)].map(() => ({
+            top: `${random() * 100}%`,
+            left: `${random() * 100}%`,
+            delay: random() * 2,
+            duration: random() * 3 + 2,
+            moveX: randomMove(),
+            moveY: randomMove(),
+        }));
+        setSparkles(newSparkles as any);
+    }, []);
 
     // Extract base color for particles
-    const particleColor = color ? "bg-current" : "bg-blue-500";
     const textColor = color ? `text-${color.split(' ')[0].replace('from-', '')}` : "text-blue-500";
 
     return (
         <div className={cn("absolute inset-0", textColor)}>
-            {[...Array(8)].map((_, i) => (
+            {sparkles.map((sparkle, i) => (
                 <motion.span
                     key={`star-${i}`}
                     animate={{
-                        top: `calc(${random() * 100}% + ${randomMove()}px)`,
-                        left: `calc(${random() * 100}% + ${randomMove()}px)`,
+                        top: `calc(${sparkle.top} + ${// @ts-ignore
+                            sparkle.moveY}px)`,
+                        left: `calc(${sparkle.left} + ${// @ts-ignore
+                            sparkle.moveX}px)`,
                         opacity: [0, 1, 0],
                         scale: [0.5, 1, 0.5],
                     }}
                     transition={{
-                        duration: random() * 3 + 2,
+                        duration: sparkle.duration,
                         repeat: Infinity,
                         ease: "easeInOut",
-                        delay: random() * 2,
+                        delay: sparkle.delay,
                     }}
                     style={{
                         position: "absolute",
-                        top: `${random() * 100}%`,
-                        left: `${random() * 100}%`,
+                        top: sparkle.top,
+                        left: sparkle.left,
                         width: `3px`,
                         height: `3px`,
                         borderRadius: "50%",
