@@ -26,13 +26,13 @@ export async function createBooking(data: any, token: string) {
         });
 
         // Notify User
-        await createNotification(
-            uid,
-            "Booking Created",
-            `Your booking for ${validData.serviceName} has been created. Please complete the payment.`,
-            "info",
-            `/payment?bookingId=${bookingRef.id}`
-        );
+        // await createNotification(
+        //     uid,
+        //     "Booking Created",
+        //     `Your booking for ${validData.serviceName} has been created. Please complete the payment.`,
+        //     "info",
+        //     `/payment?bookingId=${bookingRef.id}`
+        // );
 
         // Notify Admins
         await notifyAdmins(

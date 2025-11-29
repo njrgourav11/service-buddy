@@ -70,18 +70,75 @@ export default function Home() {
                 viewport={{ once: true }}
               >
                 <Link href={`/service/${category.id}`}>
-                  <div className="group relative overflow-hidden rounded-3xl bg-white dark:bg-gray-800 p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
-                    <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
+                  <div className="group relative overflow-hidden rounded-3xl bg-white dark:bg-gray-900 p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 dark:border-gray-800">
+                    <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
+                    <div className="absolute -right-10 -top-10 w-32 h-32 bg-gradient-to-br from-gray-100 to-transparent dark:from-gray-800 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
 
-                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 shadow-lg`}>
+                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg relative z-10`}>
                       <category.icon className="w-8 h-8 text-white" />
                     </div>
 
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 transition-all duration-300">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 transition-all duration-300 relative z-10">
                       {category.title}
                     </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 relative z-10 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
+                      Professional {category.title} services at your doorstep
+                    </p>
+
+                    <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300">
+                      <ArrowRight className="w-6 h-6 text-gray-400 dark:text-gray-500" />
+                    </div>
                   </div>
                 </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-24 bg-white dark:bg-gray-950 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              How It Works
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              Get your home services done in 3 simple steps
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+            {/* Connecting Line */}
+            <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 dark:from-blue-900 dark:via-purple-900 dark:to-pink-900 -translate-y-1/2 -z-10" />
+
+            {[
+              { title: "Book a Service", desc: "Choose from our wide range of services and select a convenient time.", icon: "1" },
+              { title: "Expert Arrives", desc: "Our verified professional arrives at your doorstep on time.", icon: "2" },
+              { title: "Job Done", desc: "Sit back and relax while we get the job done to your satisfaction.", icon: "3" }
+            ].map((step, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.2, duration: 0.6 }}
+                viewport={{ once: true }}
+                className="flex flex-col items-center text-center bg-white dark:bg-gray-900 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 relative group hover:-translate-y-2 transition-transform duration-300"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-2xl font-bold text-white mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  {step.icon}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{step.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                  {step.desc}
+                </p>
               </motion.div>
             ))}
           </div>

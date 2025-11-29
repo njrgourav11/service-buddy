@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${outfit.variable} antialiased font-sans`}
+        className={`${outfit.variable} antialiased font-sans overflow-x-hidden`}
       >
         <ThemeProvider
           attribute="class"
@@ -38,7 +38,7 @@ export default function RootLayout({
             <CartProvider>
               <ToastProvider>
                 <Header />
-                <main className="min-h-screen">
+                <main className="min-h-screen pt-14">
                   {children}
                 </main>
                 <Footer />

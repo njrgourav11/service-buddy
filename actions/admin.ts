@@ -1,6 +1,7 @@
 "use server";
 
 import { adminDb, adminAuth } from "@/lib/firebase-admin";
+import { createNotification } from "./notification";
 
 export async function getAdminStats(token: string) {
     try {
@@ -97,6 +98,26 @@ export async function assignTechnician(bookingId: string, technicianId: string, 
             status: "assigned",
             updatedAt: new Date().toISOString()
         });
+
+        // Notify Customer
+        if (bookingData?.userId) {
+            await createNotification(
+                bookingData.userId,
+                "Technician Assigned",
+                `${techData?.fullName} has been assigned to your booking for ${bookingData?.serviceName}.`,
+                "info",
+                `/bookings/${bookingId}`
+            );
+        }
+
+        // Notify Technician
+        await createNotification(
+            technicianId,
+            "New Job Assigned",
+            `You have been assigned a new job: ${bookingData?.serviceName} for ${bookingData?.userName}.`,
+            "info",
+            `/technician/jobs/${bookingId}`
+        );
 
         return { success: true };
     } catch (error: any) {

@@ -62,11 +62,13 @@ function CheckoutContent() {
     const [customAddress, setCustomAddress] = useState("");
     const [processing, setProcessing] = useState(false);
 
+    const [isRedirecting, setIsRedirecting] = useState(false);
+
     useEffect(() => {
-        if (items.length === 0) {
+        if (items.length === 0 && !isRedirecting) {
             router.push("/cart");
         }
-    }, [items, router]);
+    }, [items, router, isRedirecting]);
 
     const handleNext = async () => {
         if (currentStep < steps.length) {
@@ -135,6 +137,7 @@ function CheckoutContent() {
                 }
 
                 console.log('Redirecting to payment with bookingId:', firstBookingId);
+                setIsRedirecting(true); // Prevent redirect to cart
                 clearCart();
                 router.push(`/payment?bookingId=${firstBookingId}`);
             } else {
@@ -149,7 +152,7 @@ function CheckoutContent() {
         }
     };
 
-    if (items.length === 0) {
+    if (items.length === 0 && !isRedirecting) {
         return null; // Redirecting in useEffect
     }
 
