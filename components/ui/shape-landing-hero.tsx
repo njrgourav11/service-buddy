@@ -103,7 +103,7 @@ function HeroGeometric({
     };
 
     return (
-        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#030303]">
+        <div className="relative min-h-[85vh] md:min-h-screen w-full flex items-center justify-center overflow-hidden bg-white dark:bg-[#030303]">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.05] via-transparent to-rose-500/[0.05] blur-3xl" />
 
             <div className="absolute inset-0 overflow-hidden">
@@ -176,6 +176,18 @@ function HeroGeometric({
                         </h1>
                     </motion.div>
 
+                    <motion.div
+                        custom={1}
+                        variants={fadeUpVariants}
+                        initial="hidden"
+                        animate="visible"
+                    >
+                        <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-8 leading-relaxed font-medium tracking-wide max-w-xl mx-auto">
+                            Connect with top-rated professionals for all your home service needs.
+                            Fast, reliable, and secure.
+                        </p>
+                    </motion.div>
+
 
 
                     <motion.div
@@ -189,6 +201,14 @@ function HeroGeometric({
                             placeholder="What service do you need?"
                             onSearch={handleSearch}
                         />
+                        <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                            <span className="font-semibold">Popular:</span>
+                            {["AC Repair", "Home Cleaning", "Electrician", "Plumber"].map((tag, i) => (
+                                <span key={i} className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" onClick={() => handleSearch(tag)}>
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
                     </motion.div>
                 </div>
             </div>

@@ -12,60 +12,40 @@ import {
 
 // Define variants for the alert toast using cva
 const alertToastVariants = cva(
-    "relative w-full max-w-sm overflow-hidden rounded-lg shadow-lg flex items-start p-4 space-x-4",
+    "relative w-[90vw] sm:w-full max-w-md overflow-hidden rounded-xl shadow-xl flex items-start p-4 space-x-4 border backdrop-blur-sm transition-all duration-300",
     {
         variants: {
             variant: {
-                success: "",
-                warning: "",
-                info: "",
-                error: "",
+                success: "bg-green-50/90 dark:bg-green-950/30 border-green-200 dark:border-green-800/50",
+                warning: "bg-amber-50/90 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/50",
+                info: "bg-blue-50/90 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800/50",
+                error: "bg-red-50/90 dark:bg-red-950/30 border-red-200 dark:border-red-800/50",
             },
             styleVariant: {
-                default: "bg-background border",
-                filled: "",
+                default: "",
+                filled: "border-transparent text-white",
             },
         },
         compoundVariants: [
             {
                 variant: "success",
-                styleVariant: "default",
-                className: "text-success-foreground border-green-200 dark:border-green-700",
-            },
-            {
-                variant: "warning",
-                styleVariant: "default",
-                className: "text-warning-foreground border-yellow-200 dark:border-yellow-700",
-            },
-            {
-                variant: "info",
-                styleVariant: "default",
-                className: "text-info-foreground border-blue-200 dark:border-blue-700",
-            },
-            {
-                variant: "error",
-                styleVariant: "default",
-                className: "text-destructive-foreground border-red-200 dark:border-red-700",
-            },
-            {
-                variant: "success",
                 styleVariant: "filled",
-                className: "bg-success text-success-foreground",
+                className: "bg-green-600 dark:bg-green-600",
             },
             {
                 variant: "warning",
                 styleVariant: "filled",
-                className: "bg-warning text-warning-foreground",
+                className: "bg-amber-500 dark:bg-amber-600",
             },
             {
                 variant: "info",
                 styleVariant: "filled",
-                className: "bg-info text-info-foreground",
+                className: "bg-blue-600 dark:bg-blue-600",
             },
             {
                 variant: "error",
                 styleVariant: "filled",
-                className: "bg-destructive text-destructive-foreground",
+                className: "bg-red-600 dark:bg-red-600",
             },
         ],
         defaultVariants: {
@@ -86,16 +66,16 @@ const iconMap = {
 // Define icon color classes
 const iconColorClasses: Record<string, Record<string, string>> = {
     default: {
-        success: "text-green-500",
-        warning: "text-yellow-500",
-        info: "text-blue-500",
-        error: "text-red-500",
+        success: "text-green-600 dark:text-green-400",
+        warning: "text-amber-600 dark:text-amber-400",
+        info: "text-blue-600 dark:text-blue-400",
+        error: "text-red-600 dark:text-red-400",
     },
     filled: {
-        success: "text-success-foreground",
-        warning: "text-warning-foreground",
-        info: "text-info-foreground",
-        error: "text-destructive-foreground",
+        success: "text-white",
+        warning: "text-white",
+        info: "text-white",
+        error: "text-white",
     },
 };
 

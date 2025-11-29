@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -9,6 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { BentoGrid, type BentoItem } from "@/components/ui/bento-grid";
 import { HeroGeometric } from "@/components/ui/shape-landing-hero";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
+
+import ServiceCard from "@/components/ui/service-card";
+import SpotlightCTA from "@/components/ui/spotlight-cta";
 import {
   Home as HomeIcon,
   Wrench,
@@ -60,7 +64,7 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {categories.map((category, index) => (
               <motion.div
                 key={category.id}
@@ -70,25 +74,13 @@ export default function Home() {
                 viewport={{ once: true }}
               >
                 <Link href={`/service/${category.id}`}>
-                  <div className="group relative overflow-hidden rounded-3xl bg-white dark:bg-gray-900 p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 dark:border-gray-800">
-                    <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
-                    <div className="absolute -right-10 -top-10 w-32 h-32 bg-gradient-to-br from-gray-100 to-transparent dark:from-gray-800 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-
-                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg relative z-10`}>
-                      <category.icon className="w-8 h-8 text-white" />
-                    </div>
-
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 transition-all duration-300 relative z-10">
-                      {category.title}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 relative z-10 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
-                      Professional {category.title} services at your doorstep
-                    </p>
-
-                    <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300">
-                      <ArrowRight className="w-6 h-6 text-gray-400 dark:text-gray-500" />
-                    </div>
-                  </div>
+                  <ServiceCard
+                    title={category.title}
+                    description={`Professional ${category.title} services at your doorstep`}
+                    icon={category.icon}
+                    color={category.color}
+                    className="h-full"
+                  />
                 </Link>
               </motion.div>
             ))}
@@ -203,37 +195,8 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600" />
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20" />
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10"
-        >
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-8">
-            Ready to Transform Your Home?
-          </h2>
-          <p className="text-xl md:text-2xl text-blue-100 mb-12 leading-relaxed">
-            Join thousands of satisfied customers who trust ServiceBuddy for their home needs
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-50 font-bold px-12 h-16 text-lg rounded-full shadow-2xl hover:shadow-3xl hover:scale-105 transition-all">
-              Book a Service Now
-            </Button>
-            <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 font-bold px-12 h-16 text-lg rounded-full backdrop-blur-sm hover:scale-105 transition-all">
-              Become a Professional
-            </Button>
-          </div>
-        </motion.div>
-
-        {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-500/20 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl" />
+      <section className="w-full">
+        <SpotlightCTA />
       </section>
     </div>
   );
