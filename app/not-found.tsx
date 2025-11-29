@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Navigation } from "@/components/navigation"
+
 import {
   Home,
   Search,
@@ -42,7 +42,7 @@ export default function NotFoundPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans selection:bg-blue-100 dark:selection:bg-blue-900">
-      <Navigation />
+
 
       <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 sm:px-6 lg:px-8 py-12">
         <div className="w-full max-w-5xl">

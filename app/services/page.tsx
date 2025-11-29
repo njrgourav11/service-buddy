@@ -22,7 +22,15 @@ import {
 } from "lucide-react";
 import { ServiceIcon } from "@/components/service-icon";
 
-const categories = ["Cleaning", "Appliance", "Electrical", "Plumbing", "Home Repair", "Beauty", "Wellness", "Gardening"];
+const categories = [
+  "Appliance Repair & Service",
+  "Electrical Repair & Service",
+  "Plumbing Repair & Service",
+  "Carpentry Repair & Service",
+  "Home Decor & Installation",
+  "Home Cleaning",
+  "Home Painting & Makeover"
+];
 
 function ServicesContent() {
   const searchParams = useSearchParams();
@@ -198,13 +206,14 @@ function ServicesContent() {
                       title={service.title}
                       description={service.description}
                       price={`₹${service.price}`}
-                      image={`https://images.unsplash.com/photo-${service.category === 'Cleaning' ? '1581578731548-c64695cc6952' :
-                          service.category === 'Plumbing' ? '1607472586893-edb57bdc0e39' :
-                            service.category === 'Electrical' ? '1621905251918-48416bd8575a' :
-                              service.category === 'Appliance' ? '1556911220-e15b29be8c8f' :
-                                service.category === 'Beauty' ? '1560066984-3ad0cf870f3e' :
-                                  service.category === 'Gardening' ? '1416879595882-3373a0480b5b' :
-                                    '1581578731548-c64695cc6952'
+                      image={`https://images.unsplash.com/photo-${service.category.includes('Cleaning') ? '1581578731548-c64695cc6952' :
+                          service.category.includes('Plumbing') ? '1607472586893-edb57bdc0e39' :
+                            service.category.includes('Electrical') ? '1621905251918-48416bd8575a' :
+                              service.category.includes('Appliance') ? '1556911220-e15b29be8c8f' :
+                                service.category.includes('Carpentry') ? '1622066869579-d40763273d16' :
+                                  service.category.includes('Decor') ? '1618221195710-dd6b41faaea6' :
+                                    service.category.includes('Painting') ? '1562663445-6db5c6827fc5' :
+                                      '1581578731548-c64695cc6952'
                         }?w=400&h=300&fit=crop`}
                       category={service.category}
                       rating={service.rating.toFixed(1)}

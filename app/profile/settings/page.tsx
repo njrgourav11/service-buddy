@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Navigation } from "@/components/navigation"
+
 import { Footer } from "@/components/footer"
 import {
   User,
@@ -87,7 +87,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navigation />
+
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
@@ -160,7 +160,7 @@ export default function SettingsPage() {
                       <Input
                         id="firstName"
                         value={profileData.firstName}
-                        onChange={(e) => setProfileData({...profileData, firstName: e.target.value})}
+                        onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
                       />
                     </div>
                     <div>
@@ -168,7 +168,7 @@ export default function SettingsPage() {
                       <Input
                         id="lastName"
                         value={profileData.lastName}
-                        onChange={(e) => setProfileData({...profileData, lastName: e.target.value})}
+                        onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
                       />
                     </div>
                   </div>
@@ -183,7 +183,7 @@ export default function SettingsPage() {
                           id="email"
                           type="email"
                           value={profileData.email}
-                          onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                          onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
                           className="pl-10"
                         />
                       </div>
@@ -195,7 +195,7 @@ export default function SettingsPage() {
                         <Input
                           id="phone"
                           value={profileData.phone}
-                          onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                          onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
                           className="pl-10"
                         />
                       </div>
@@ -210,7 +210,7 @@ export default function SettingsPage() {
                       <Input
                         id="address"
                         value={profileData.address}
-                        onChange={(e) => setProfileData({...profileData, address: e.target.value})}
+                        onChange={(e) => setProfileData({ ...profileData, address: e.target.value })}
                         className="pl-10"
                       />
                     </div>
@@ -222,7 +222,7 @@ export default function SettingsPage() {
                       <Input
                         id="city"
                         value={profileData.city}
-                        onChange={(e) => setProfileData({...profileData, city: e.target.value})}
+                        onChange={(e) => setProfileData({ ...profileData, city: e.target.value })}
                       />
                     </div>
                     <div>
@@ -230,7 +230,7 @@ export default function SettingsPage() {
                       <Input
                         id="state"
                         value={profileData.state}
-                        onChange={(e) => setProfileData({...profileData, state: e.target.value})}
+                        onChange={(e) => setProfileData({ ...profileData, state: e.target.value })}
                       />
                     </div>
                     <div>
@@ -238,7 +238,7 @@ export default function SettingsPage() {
                       <Input
                         id="pincode"
                         value={profileData.pincode}
-                        onChange={(e) => setProfileData({...profileData, pincode: e.target.value})}
+                        onChange={(e) => setProfileData({ ...profileData, pincode: e.target.value })}
                       />
                     </div>
                   </div>
@@ -249,7 +249,7 @@ export default function SettingsPage() {
                     <Textarea
                       id="bio"
                       value={profileData.bio}
-                      onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
+                      onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
                       placeholder="Tell us a bit about yourself..."
                       rows={3}
                     />
@@ -287,7 +287,7 @@ export default function SettingsPage() {
                     <Switch
                       id="email-bookings"
                       checked={notifications.emailBookings}
-                      onCheckedChange={(checked) => setNotifications({...notifications, emailBookings: checked})}
+                      onCheckedChange={(checked) => setNotifications({ ...notifications, emailBookings: checked })}
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -298,7 +298,7 @@ export default function SettingsPage() {
                     <Switch
                       id="email-promotions"
                       checked={notifications.emailPromotions}
-                      onCheckedChange={(checked) => setNotifications({...notifications, emailPromotions: checked})}
+                      onCheckedChange={(checked) => setNotifications({ ...notifications, emailPromotions: checked })}
                     />
                   </div>
                 </CardContent>
@@ -320,7 +320,7 @@ export default function SettingsPage() {
                     <Switch
                       id="sms-bookings"
                       checked={notifications.smsBookings}
-                      onCheckedChange={(checked) => setNotifications({...notifications, smsBookings: checked})}
+                      onCheckedChange={(checked) => setNotifications({ ...notifications, smsBookings: checked })}
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -331,7 +331,7 @@ export default function SettingsPage() {
                     <Switch
                       id="sms-reminders"
                       checked={notifications.smsReminders}
-                      onCheckedChange={(checked) => setNotifications({...notifications, smsReminders: checked})}
+                      onCheckedChange={(checked) => setNotifications({ ...notifications, smsReminders: checked })}
                     />
                   </div>
                 </CardContent>
@@ -353,7 +353,7 @@ export default function SettingsPage() {
                     <Switch
                       id="push-bookings"
                       checked={notifications.pushBookings}
-                      onCheckedChange={(checked) => setNotifications({...notifications, pushBookings: checked})}
+                      onCheckedChange={(checked) => setNotifications({ ...notifications, pushBookings: checked })}
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -364,7 +364,7 @@ export default function SettingsPage() {
                     <Switch
                       id="push-updates"
                       checked={notifications.pushUpdates}
-                      onCheckedChange={(checked) => setNotifications({...notifications, pushUpdates: checked})}
+                      onCheckedChange={(checked) => setNotifications({ ...notifications, pushUpdates: checked })}
                     />
                   </div>
                 </CardContent>
@@ -395,7 +395,7 @@ export default function SettingsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="language">Language</Label>
-                      <Select value={preferences.language} onValueChange={(value) => setPreferences({...preferences, language: value})}>
+                      <Select value={preferences.language} onValueChange={(value) => setPreferences({ ...preferences, language: value })}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -408,7 +408,7 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <Label htmlFor="timezone">Timezone</Label>
-                      <Select value={preferences.timezone} onValueChange={(value) => setPreferences({...preferences, timezone: value})}>
+                      <Select value={preferences.timezone} onValueChange={(value) => setPreferences({ ...preferences, timezone: value })}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -422,7 +422,7 @@ export default function SettingsPage() {
 
                   <div>
                     <Label htmlFor="currency">Currency</Label>
-                    <Select value={preferences.currency} onValueChange={(value) => setPreferences({...preferences, currency: value})}>
+                    <Select value={preferences.currency} onValueChange={(value) => setPreferences({ ...preferences, currency: value })}>
                       <SelectTrigger className="w-full md:w-48">
                         <SelectValue />
                       </SelectTrigger>
@@ -445,7 +445,7 @@ export default function SettingsPage() {
                 <CardContent>
                   <div>
                     <Label htmlFor="theme">Theme</Label>
-                    <Select value={preferences.theme} onValueChange={(value) => setPreferences({...preferences, theme: value})}>
+                    <Select value={preferences.theme} onValueChange={(value) => setPreferences({ ...preferences, theme: value })}>
                       <SelectTrigger className="w-full md:w-48">
                         <SelectValue />
                       </SelectTrigger>
@@ -497,7 +497,7 @@ export default function SettingsPage() {
                       id="current-password"
                       type="password"
                       value={security.currentPassword}
-                      onChange={(e) => setSecurity({...security, currentPassword: e.target.value})}
+                      onChange={(e) => setSecurity({ ...security, currentPassword: e.target.value })}
                     />
                   </div>
                   <div>
@@ -506,7 +506,7 @@ export default function SettingsPage() {
                       id="new-password"
                       type="password"
                       value={security.newPassword}
-                      onChange={(e) => setSecurity({...security, newPassword: e.target.value})}
+                      onChange={(e) => setSecurity({ ...security, newPassword: e.target.value })}
                     />
                   </div>
                   <div>
@@ -515,7 +515,7 @@ export default function SettingsPage() {
                       id="confirm-password"
                       type="password"
                       value={security.confirmPassword}
-                      onChange={(e) => setSecurity({...security, confirmPassword: e.target.value})}
+                      onChange={(e) => setSecurity({ ...security, confirmPassword: e.target.value })}
                     />
                   </div>
                   <Button onClick={handleChangePassword} variant="outline">
@@ -543,7 +543,7 @@ export default function SettingsPage() {
                     <Switch
                       id="2fa"
                       checked={security.twoFactorEnabled}
-                      onCheckedChange={(checked) => setSecurity({...security, twoFactorEnabled: checked})}
+                      onCheckedChange={(checked) => setSecurity({ ...security, twoFactorEnabled: checked })}
                     />
                   </div>
                 </CardContent>

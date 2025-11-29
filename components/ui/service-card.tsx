@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 export interface ServiceCardProps {
     title: string;
-    description: string;
+    description?: string;
     icon: React.ComponentType<{ className?: string }>;
     color?: string;
     className?: string;
@@ -43,7 +43,7 @@ const Skeleton = ({ icon: Icon, color }: { icon: React.ComponentType<{ className
             {/* Hero Icon */}
             <div className="relative z-10 flex items-center justify-center transition-transform duration-500 group-hover/skeleton:scale-110">
                 <div className={cn(
-                    "relative h-24 w-24 rounded-3xl flex items-center justify-center shadow-2xl transition-all duration-500",
+                    "relative h-16 w-16 md:h-24 md:w-24 rounded-3xl flex items-center justify-center shadow-2xl transition-all duration-500",
                     "bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800",
                     "group-hover/skeleton:shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] dark:group-hover/skeleton:shadow-[0_0_40px_-10px_rgba(255,255,255,0.1)]"
                 )}>
@@ -54,7 +54,7 @@ const Skeleton = ({ icon: Icon, color }: { icon: React.ComponentType<{ className
                     )} />
 
                     <Icon className={cn(
-                        "h-12 w-12 transition-colors duration-500",
+                        "h-8 w-8 md:h-12 md:w-12 transition-colors duration-500",
                         color ? `text-${color.split(' ')[0].replace('from-', '')}` : "text-blue-500",
                         "dark:text-white"
                     )} />
@@ -155,7 +155,7 @@ export const Card = ({
     return (
         <div
             className={cn(
-                "max-w-sm w-full mx-auto p-6 rounded-3xl border transition-all duration-300 group",
+                "max-w-sm w-full mx-auto p-3 md:p-6 rounded-3xl border transition-all duration-300 group",
                 "bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm",
                 "border-slate-200 dark:border-slate-800",
                 "hover:border-slate-300 dark:hover:border-slate-700",
@@ -178,7 +178,7 @@ export const CardTitle = ({
     return (
         <h3
             className={cn(
-                "text-xl font-bold text-slate-900 dark:text-white py-2 mt-4 text-center group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-slate-900 group-hover:to-slate-600 dark:group-hover:from-white dark:group-hover:to-slate-300 transition-all duration-300",
+                "text-sm md:text-xl font-bold text-slate-900 dark:text-white py-2 mt-2 md:mt-4 text-center group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-slate-900 group-hover:to-slate-600 dark:group-hover:from-white dark:group-hover:to-slate-300 transition-all duration-300",
                 className
             )}
         >
@@ -197,7 +197,7 @@ export const CardDescription = ({
     return (
         <p
             className={cn(
-                "text-sm font-medium text-slate-500 dark:text-slate-400 max-w-sm text-center leading-relaxed",
+                "text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 max-w-sm text-center leading-relaxed",
                 className
             )}
         >
@@ -218,7 +218,7 @@ export const CardSkeletonContainer = ({
     return (
         <div
             className={cn(
-                "h-[12rem] rounded-2xl z-40 relative overflow-hidden transition-all duration-500",
+                "h-[8rem] md:h-[12rem] rounded-2xl z-40 relative overflow-hidden transition-all duration-500",
                 "bg-slate-50 dark:bg-slate-800/50",
                 "group-hover:bg-white dark:group-hover:bg-slate-800",
                 className

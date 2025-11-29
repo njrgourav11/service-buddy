@@ -26,16 +26,21 @@ import {
   Star,
   Users,
   ArrowRight,
+  Hammer,
+  Armchair,
+  Sparkles,
+  Paintbrush,
 } from "lucide-react";
 
 export default function Home() {
   const categories = [
-    { id: "home-cleaning", title: "Home Cleaning", icon: HomeIcon, color: "from-blue-500 to-cyan-500" },
-    { id: "plumbing", title: "Plumbing", icon: Droplets, color: "from-cyan-500 to-blue-500" },
-    { id: "electrical", title: "Electrical", icon: Zap, color: "from-yellow-500 to-orange-500" },
-    { id: "appliance-repair", title: "Appliance Repair", icon: Wrench, color: "from-orange-500 to-red-500" },
-    { id: "beauty-salon", title: "Beauty & Salon", icon: Scissors, color: "from-pink-500 to-purple-500" },
-    { id: "gardening", title: "Gardening", icon: Leaf, color: "from-green-500 to-emerald-500" },
+    { id: "appliance-repair", title: "Appliance Repair & Service", icon: Wrench, color: "from-orange-500 to-red-500" },
+    { id: "electrical", title: "Electrical Repair & Service", icon: Zap, color: "from-yellow-500 to-orange-500" },
+    { id: "plumbing", title: "Plumbing Repair & Service", icon: Droplets, color: "from-cyan-500 to-blue-500" },
+    { id: "carpentry", title: "Carpentry Repair & Service", icon: Hammer, color: "from-amber-500 to-orange-600" },
+    { id: "home-decor", title: "Home Decor & Installation", icon: Armchair, color: "from-purple-500 to-pink-500" },
+    { id: "home-cleaning", title: "Home Cleaning", icon: Sparkles, color: "from-blue-500 to-cyan-500" },
+    { id: "painting", title: "Home Painting & Makeover", icon: Paintbrush, color: "from-pink-500 to-rose-500" },
   ];
 
   return (
@@ -74,10 +79,9 @@ export default function Home() {
                 transition={{ delay: index * 0.1, duration: 0.6 }}
                 viewport={{ once: true }}
               >
-                <Link href={`/service/${category.id}`}>
+                <Link href={`/category/${category.id}`}>
                   <ServiceCard
                     title={category.title}
-                    description={`Professional ${category.title} services at your doorstep`}
                     icon={category.icon}
                     color={category.color}
                     className="h-full"

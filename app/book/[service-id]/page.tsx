@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
-import { Navigation } from "@/components/navigation"
+
 import { Footer } from "@/components/footer"
 import {
   Calendar,
@@ -100,7 +100,7 @@ export default function BookingPage() {
   if (!service) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navigation />
+
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
@@ -308,7 +308,7 @@ export default function BookingPage() {
                     <Input
                       id="name"
                       value={customerDetails.name}
-                      onChange={(e) => setCustomerDetails({...customerDetails, name: e.target.value})}
+                      onChange={(e) => setCustomerDetails({ ...customerDetails, name: e.target.value })}
                       placeholder="Enter your full name"
                     />
                   </div>
@@ -318,7 +318,7 @@ export default function BookingPage() {
                       id="phone"
                       type="tel"
                       value={customerDetails.phone}
-                      onChange={(e) => setCustomerDetails({...customerDetails, phone: e.target.value})}
+                      onChange={(e) => setCustomerDetails({ ...customerDetails, phone: e.target.value })}
                       placeholder="Enter your phone number"
                     />
                   </div>
@@ -330,7 +330,7 @@ export default function BookingPage() {
                     id="email"
                     type="email"
                     value={customerDetails.email}
-                    onChange={(e) => setCustomerDetails({...customerDetails, email: e.target.value})}
+                    onChange={(e) => setCustomerDetails({ ...customerDetails, email: e.target.value })}
                     placeholder="Enter your email address"
                   />
                 </div>
@@ -340,7 +340,7 @@ export default function BookingPage() {
                   <Textarea
                     id="address"
                     value={customerDetails.address}
-                    onChange={(e) => setCustomerDetails({...customerDetails, address: e.target.value})}
+                    onChange={(e) => setCustomerDetails({ ...customerDetails, address: e.target.value })}
                     placeholder="Enter your complete address"
                     rows={3}
                   />
@@ -352,7 +352,7 @@ export default function BookingPage() {
                     <Input
                       id="city"
                       value={customerDetails.city}
-                      onChange={(e) => setCustomerDetails({...customerDetails, city: e.target.value})}
+                      onChange={(e) => setCustomerDetails({ ...customerDetails, city: e.target.value })}
                       placeholder="Enter your city"
                     />
                   </div>
@@ -361,7 +361,7 @@ export default function BookingPage() {
                     <Input
                       id="pincode"
                       value={customerDetails.pincode}
-                      onChange={(e) => setCustomerDetails({...customerDetails, pincode: e.target.value})}
+                      onChange={(e) => setCustomerDetails({ ...customerDetails, pincode: e.target.value })}
                       placeholder="Enter pincode"
                     />
                   </div>
@@ -372,7 +372,7 @@ export default function BookingPage() {
                   <Textarea
                     id="instructions"
                     value={customerDetails.specialInstructions}
-                    onChange={(e) => setCustomerDetails({...customerDetails, specialInstructions: e.target.value})}
+                    onChange={(e) => setCustomerDetails({ ...customerDetails, specialInstructions: e.target.value })}
                     placeholder="Any special instructions for the service provider"
                     rows={2}
                   />
@@ -485,7 +485,7 @@ export default function BookingPage() {
                           id="card-number"
                           placeholder="1234 5678 9012 3456"
                           value={cardDetails.number}
-                          onChange={(e) => setCardDetails({...cardDetails, number: e.target.value})}
+                          onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -495,7 +495,7 @@ export default function BookingPage() {
                             id="expiry"
                             placeholder="MM/YY"
                             value={cardDetails.expiry}
-                            onChange={(e) => setCardDetails({...cardDetails, expiry: e.target.value})}
+                            onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
                           />
                         </div>
                         <div>
@@ -504,7 +504,7 @@ export default function BookingPage() {
                             id="cvv"
                             placeholder="123"
                             value={cardDetails.cvv}
-                            onChange={(e) => setCardDetails({...cardDetails, cvv: e.target.value})}
+                            onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
                           />
                         </div>
                       </div>
@@ -514,7 +514,7 @@ export default function BookingPage() {
                           id="card-name"
                           placeholder="John Doe"
                           value={cardDetails.name}
-                          onChange={(e) => setCardDetails({...cardDetails, name: e.target.value})}
+                          onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
                         />
                       </div>
                     </motion.div>
@@ -599,7 +599,7 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navigation />
+
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Progress Steps */}
@@ -607,11 +607,10 @@ export default function BookingPage() {
           <div className="flex items-center justify-center space-x-4">
             {steps.map((step, index) => (
               <div key={step.id} className="flex items-center">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                  currentStep >= step.id
-                    ? "bg-blue-600 border-blue-600 text-white"
-                    : "border-gray-300 text-gray-500"
-                }`}>
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${currentStep >= step.id
+                  ? "bg-blue-600 border-blue-600 text-white"
+                  : "border-gray-300 text-gray-500"
+                  }`}>
                   {currentStep > step.id ? (
                     <CheckCircle className="h-5 w-5" />
                   ) : (
@@ -619,17 +618,15 @@ export default function BookingPage() {
                   )}
                 </div>
                 <div className="ml-3 hidden sm:block">
-                  <div className={`text-sm font-medium ${
-                    currentStep >= step.id ? "text-blue-600" : "text-gray-500"
-                  }`}>
+                  <div className={`text-sm font-medium ${currentStep >= step.id ? "text-blue-600" : "text-gray-500"
+                    }`}>
                     {step.title}
                   </div>
                   <div className="text-xs text-gray-400">{step.description}</div>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`w-12 h-0.5 mx-4 ${
-                    currentStep > step.id ? "bg-blue-600" : "bg-gray-300"
-                  }`} />
+                  <div className={`w-12 h-0.5 mx-4 ${currentStep > step.id ? "bg-blue-600" : "bg-gray-300"
+                    }`} />
                 )}
               </div>
             ))}

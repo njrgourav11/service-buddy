@@ -46,6 +46,10 @@ import {
     User,
     LayoutDashboard,
     ShoppingCart,
+    Hammer,
+    Armchair,
+    Paintbrush,
+    Sparkles
 } from 'lucide-react';
 import { useCart } from "@/context/CartContext";
 
@@ -361,40 +365,46 @@ function ListItem({
 
 const serviceLinks: LinkItem[] = [
     {
-        title: 'Home Cleaning',
-        href: '/service/home-cleaning',
-        description: 'Professional home cleaning services',
-        icon: Home,
-    },
-    {
-        title: 'Plumbing',
-        href: '/service/plumbing',
-        description: 'Expert plumbing repairs and installations',
-        icon: Droplets,
-    },
-    {
-        title: 'Electrical',
-        href: '/service/electrical',
-        description: 'Licensed electricians for all your needs',
-        icon: Zap,
-    },
-    {
         title: 'Appliance Repair',
-        href: '/service/appliance-repair',
-        description: 'Fix all your home appliances',
+        href: '/category/appliance-repair',
+        description: 'Expert repair for all home appliances',
         icon: Wrench,
     },
     {
-        title: 'Beauty & Salon',
-        href: '/service/beauty-salon',
-        description: 'Professional beauty services at home',
-        icon: Scissors,
+        title: 'Electrical',
+        href: '/category/electrical',
+        description: 'Professional electrical services',
+        icon: Zap,
     },
     {
-        title: 'Gardening',
-        href: '/service/gardening',
-        description: 'Lawn care and garden maintenance',
-        icon: Leaf,
+        title: 'Plumbing',
+        href: '/category/plumbing',
+        description: 'Reliable plumbing solutions',
+        icon: Droplets,
+    },
+    {
+        title: 'Carpentry',
+        href: '/category/carpentry',
+        description: 'Skilled carpentry work',
+        icon: Hammer,
+    },
+    {
+        title: 'Home Decor',
+        href: '/category/home-decor',
+        description: 'Transform your space',
+        icon: Armchair,
+    },
+    {
+        title: 'Home Cleaning',
+        href: '/category/home-cleaning',
+        description: 'Deep cleaning services',
+        icon: Sparkles,
+    },
+    {
+        title: 'Painting',
+        href: '/category/painting',
+        description: 'Fresh look for your home',
+        icon: Paintbrush,
     },
 ];
 

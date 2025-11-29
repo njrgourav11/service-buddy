@@ -6,8 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trash2, ShoppingBag, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { ServiceIcon } from "@/components/service-icon"
-import { Navigation } from "@/components/navigation" // Wait, we removed this from static pages, but we can use Header implicitly or just use layout structure. 
-// Actually, layout provides Header. We don't need Navigation here.
+
 
 export default function CartPage() {
     const { items, removeFromCart, cartTotal, clearCart } = useCart()

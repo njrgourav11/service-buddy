@@ -7,7 +7,7 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Navigation } from "@/components/navigation"
+
 import {
   Star,
   Clock,
@@ -25,6 +25,7 @@ interface Service {
   reviewCount: number
   duration: string
   category: string
+  categoryId: string
   description: string
   trending: boolean
   available: boolean
@@ -32,237 +33,140 @@ interface Service {
 
 const allServices: Service[] = [
   {
-    id: "home-cleaning",
-    title: "Home Cleaning",
+    id: "home-cleaning-basic",
+    title: "Basic Home Cleaning",
     icon: "🧹",
     price: "₹299",
     rating: 4.8,
     reviewCount: 1250,
     duration: "2-3 hours",
-    category: "Home Services",
+    category: "Home Cleaning",
+    categoryId: "home-cleaning",
     description: "Professional deep cleaning services for your home",
     trending: true,
     available: true
   },
   {
-    id: "plumbing",
-    title: "Plumbing",
+    id: "plumbing-repair",
+    title: "General Plumbing",
     icon: "🔧",
     price: "₹199",
     rating: 4.7,
     reviewCount: 890,
     duration: "1-2 hours",
-    category: "Home Services",
+    category: "Plumbing",
+    categoryId: "plumbing",
     description: "Expert plumbing repairs and installations",
     trending: false,
     available: true
   },
   {
-    id: "electrical",
-    title: "Electrical",
+    id: "electrical-repair",
+    title: "Electrical Checkup",
     icon: "⚡",
     price: "₹249",
     rating: 4.9,
     reviewCount: 756,
     duration: "1-3 hours",
-    category: "Home Services",
+    category: "Electrical",
+    categoryId: "electrical",
     description: "Licensed electricians for all your electrical needs",
     trending: true,
     available: true
   },
   {
-    id: "appliance-repair",
-    title: "Appliance Repair",
-    icon: "🔨",
+    id: "appliance-repair-ac",
+    title: "AC Repair & Service",
+    icon: "❄️",
     price: "₹349",
     rating: 4.6,
     reviewCount: 634,
     duration: "2-4 hours",
-    category: "Home Services",
-    description: "Repair and maintenance of household appliances",
-    trending: false,
-    available: true
-  },
-  {
-    id: "pest-control",
-    title: "Pest Control",
-    icon: "🐛",
-    price: "₹399",
-    rating: 4.7,
-    reviewCount: 523,
-    duration: "2-3 hours",
-    category: "Home Services",
-    description: "Effective pest control and prevention services",
-    trending: false,
-    available: true
-  },
-  {
-    id: "gardening",
-    title: "Gardening",
-    icon: "🌱",
-    price: "₹199",
-    rating: 4.5,
-    reviewCount: 412,
-    duration: "3-5 hours",
-    category: "Outdoor Services",
-    description: "Professional gardening and landscaping services",
-    trending: false,
-    available: true
-  },
-  {
-    id: "beauty-salon",
-    title: "Beauty & Salon",
-    icon: "💄",
-    price: "₹499",
-    rating: 4.8,
-    reviewCount: 987,
-    duration: "1-2 hours",
-    category: "Personal Care",
-    description: "Salon services at home - hair, beauty, and wellness",
+    category: "Appliance Repair",
+    categoryId: "appliance-repair",
+    description: "Repair and maintenance of air conditioners",
     trending: true,
     available: true
   },
   {
-    id: "car-services",
-    title: "Car Services",
-    icon: "🚗",
-    price: "₹299",
-    rating: 4.6,
-    reviewCount: 845,
-    duration: "1-4 hours",
-    category: "Automotive",
-    description: "Car washing, detailing, and minor repairs",
-    trending: false,
-    available: true
-  },
-  {
-    id: "health-fitness",
-    title: "Health & Fitness",
-    icon: "💪",
-    price: "₹599",
-    rating: 4.7,
-    reviewCount: 678,
-    duration: "1-2 hours",
-    category: "Health",
-    description: "Personal training and fitness services at home",
-    trending: false,
-    available: true
-  },
-  {
-    id: "home-repair",
-    title: "Home Repair",
+    id: "carpentry-repair",
+    title: "Furniture Repair",
     icon: "🔨",
     price: "₹399",
     rating: 4.5,
     reviewCount: 567,
     duration: "2-6 hours",
-    category: "Home Services",
-    description: "General home repairs and maintenance",
+    category: "Carpentry",
+    categoryId: "carpentry",
+    description: "General carpentry repairs and maintenance",
     trending: false,
     available: true
   },
   {
-    id: "painting",
-    title: "Painting",
+    id: "home-decor-consult",
+    title: "Interior Design Consultation",
+    icon: "🛋️",
+    price: "₹999",
+    rating: 4.8,
+    reviewCount: 120,
+    duration: "1-2 hours",
+    category: "Home Decor",
+    categoryId: "home-decor",
+    description: "Expert advice on home decoration and layout",
+    trending: true,
+    available: true
+  },
+  {
+    id: "painting-full",
+    title: "Full Home Painting",
     icon: "🎨",
-    price: "₹449",
+    price: "₹5000",
     rating: 4.8,
     reviewCount: 734,
-    duration: "4-8 hours",
-    category: "Home Services",
+    duration: "2-3 days",
+    category: "Painting",
+    categoryId: "painting",
     description: "Interior and exterior painting services",
     trending: true,
-    available: true
-  },
-  {
-    id: "security-systems",
-    title: "Security Systems",
-    icon: "🔒",
-    price: "₹699",
-    rating: 4.9,
-    reviewCount: 456,
-    duration: "2-4 hours",
-    category: "Home Services",
-    description: "Installation and maintenance of security systems",
-    trending: false,
-    available: true
-  },
-  {
-    id: "event-services",
-    title: "Event Services",
-    icon: "🎉",
-    price: "₹899",
-    rating: 4.7,
-    reviewCount: 345,
-    duration: "4-12 hours",
-    category: "Events",
-    description: "Event planning and coordination services",
-    trending: false,
-    available: true
-  },
-  {
-    id: "pet-services",
-    title: "Pet Services",
-    icon: "🐕",
-    price: "₹249",
-    rating: 4.6,
-    reviewCount: 678,
-    duration: "1-2 hours",
-    category: "Pet Care",
-    description: "Pet grooming, walking, and care services",
-    trending: true,
-    available: true
-  },
-  {
-    id: "elderly-care",
-    title: "Elderly Care",
-    icon: "👴",
-    price: "₹399",
-    rating: 4.8,
-    reviewCount: 234,
-    duration: "2-4 hours",
-    category: "Health",
-    description: "Compassionate care services for elderly",
-    trending: false,
     available: true
   }
 ]
 
 const categoryDescriptions = {
-  "home-services": {
-    title: "Home Services",
-    description: "Professional services to keep your home clean, safe, and well-maintained",
-    icon: "🏠"
+  "appliance-repair": {
+    title: "Appliance Repair & Service",
+    description: "Expert repair and maintenance for all your home appliances",
+    icon: "🔧"
   },
-  "personal-care": {
-    title: "Personal Care",
-    description: "Beauty, wellness, and personal grooming services at your doorstep",
-    icon: "💅"
+  "electrical": {
+    title: "Electrical Repair & Service",
+    description: "Professional electrical services for your safety and convenience",
+    icon: "⚡"
   },
-  "health": {
-    title: "Health & Wellness",
-    description: "Healthcare and fitness services for your well-being",
-    icon: "❤️"
+  "plumbing": {
+    title: "Plumbing Repair & Service",
+    description: "Reliable plumbing solutions for your home",
+    icon: "🚰"
   },
-  "automotive": {
-    title: "Automotive",
-    description: "Car care, maintenance, and repair services",
-    icon: "🚗"
+  "carpentry": {
+    title: "Carpentry Repair & Service",
+    description: "Skilled carpentry work for furniture and fixtures",
+    icon: "🔨"
   },
-  "outdoor-services": {
-    title: "Outdoor Services",
-    description: "Gardening, landscaping, and outdoor maintenance",
-    icon: "🌳"
+  "home-decor": {
+    title: "Home Decor & Installation",
+    description: "Transform your space with our decor and installation services",
+    icon: "🛋️"
   },
-  "events": {
-    title: "Event Services",
-    description: "Planning and coordination for special occasions",
-    icon: "🎊"
+  "home-cleaning": {
+    title: "Home Cleaning",
+    description: "Professional cleaning services for a sparkling home",
+    icon: "🧹"
   },
-  "pet-care": {
-    title: "Pet Care",
-    description: "Professional care and services for your beloved pets",
-    icon: "🐾"
+  "painting": {
+    title: "Home Painting & Makeover",
+    description: "Give your home a fresh look with our painting services",
+    icon: "🎨"
   }
 }
 
@@ -274,7 +178,7 @@ export default function CategoryPage() {
 
   const categoryData = categoryDescriptions[slug as keyof typeof categoryDescriptions]
   const categoryServices = allServices.filter(service =>
-    service.category.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') === slug
+    service.categoryId === slug
   )
 
   const sortedServices = [...categoryServices].sort((a, b) => {
@@ -293,7 +197,7 @@ export default function CategoryPage() {
   if (!categoryData) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navigation />
+
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
@@ -316,7 +220,7 @@ export default function CategoryPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navigation />
+
 
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm">
